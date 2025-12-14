@@ -219,6 +219,7 @@ public class ProduitView {
     }
 
     private void menuComplements() {
+        // FEATURE: Gestion des complements - menu pour ajouter/lister/archiver complements
         int choix;
         do {
             System.out.println("\n--- COMPLEMENTS ---");
@@ -265,6 +266,7 @@ public class ProduitView {
     }
 
     private void ajouterComplement(TypeComplement type) {
+        // FEATURE: Ajouter un complement - saisie et sauvegarde d'un item de type Complement
         System.out.println("\n--- Ajouter " + type + " ---");
         
         String nom;
@@ -329,6 +331,7 @@ public class ProduitView {
     }
 
     private void listerComplements() {
+        // FEATURE: Lister les complements - affiche complements par categorie
         System.out.println("\n--- BOISSONS ---");
         for (Produit p : produitService.getBoissons()) {
             System.out.println("  " + p);
