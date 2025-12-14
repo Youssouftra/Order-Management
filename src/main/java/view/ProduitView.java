@@ -103,6 +103,7 @@ public class ProduitView {
     }
 
     private void ajouterBurger() {
+        // FEATURE: Ajouter un burger - saisie et sauvegarde d'un `Burger`
         System.out.println("\n--- Ajouter un burger ---");
         
         String nom;
@@ -169,6 +170,7 @@ public class ProduitView {
     }
 
     private void listerBurgers() {
+        // FEATURE: Lister les burgers - affiche les burgers disponibles
         System.out.println("\n--- Liste des burgers ---");
         ArrayList<Produit> burgers = produitService.getBurgers();
         if (burgers.isEmpty()) {
@@ -183,6 +185,7 @@ public class ProduitView {
     }
 
     private void modifierBurger() {
+        // FEATURE: Modifier un burger - permet de mettre a jour les informations d'un burger
         listerBurgers();
         System.out.print("\nID du burger a modifier: ");
         int id = scanner.nextInt();
