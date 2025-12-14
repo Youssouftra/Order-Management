@@ -34,7 +34,7 @@ public class QuartierView {
             System.out.println("5- Supprimer un quartier");
             System.out.println("0- Retour");
             System.out.print("Votre choix: ");
-            
+
             try {
                 choix = scanner.nextInt();
                 scanner.nextLine();
@@ -80,7 +80,7 @@ public class QuartierView {
 
     private void ajouterQuartier() {
         System.out.println("\n--- Ajouter un quartier ---");
-        
+
         String nom;
         do {
             System.out.print("Nom du quartier: ");
@@ -165,7 +165,8 @@ public class QuartierView {
             Quartier quartier = opt.get();
             System.out.print("Nouveau nom (" + quartier.getNom() + "): ");
             String nom = scanner.nextLine();
-            if (!nom.isEmpty()) quartier.setNom(nom);
+            if (!nom.isEmpty())
+                quartier.setNom(nom);
 
             afficherZones();
             System.out.print("Nouvelle zone (actuelle: " + quartier.getZone().getNom() + "): ");

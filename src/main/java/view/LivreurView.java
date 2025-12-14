@@ -23,7 +23,8 @@ public class LivreurView {
     }
 
     public void afficherMenu() {
-        // FEATURE: Gestion des livreurs - ajouter/lister/modifier/affecter zones/supprimer
+        // FEATURE: Gestion des livreurs - ajouter/lister/modifier/affecter
+        // zones/supprimer
         int choix;
         do {
             System.out.println("\n========== GESTION DES LIVREURS ==========");
@@ -37,7 +38,7 @@ public class LivreurView {
             System.out.println("8- Supprimer un livreur");
             System.out.println("0- Retour");
             System.out.print("Votre choix: ");
-            
+
             try {
                 choix = scanner.nextInt();
                 scanner.nextLine();
@@ -92,7 +93,7 @@ public class LivreurView {
 
     private void ajouterLivreur() {
         System.out.println("\n--- Ajouter un livreur ---");
-        
+
         String telephone;
         do {
             System.out.print("Telephone: ");
@@ -174,7 +175,7 @@ public class LivreurView {
         Optional<Livreur> opt = livreurService.getById(id);
         if (opt.isPresent()) {
             Livreur livreur = opt.get();
-            
+
             System.out.print("Nouveau nom (" + livreur.getNom() + "): ");
             String nom = scanner.nextLine();
             if (!nom.isEmpty()) {

@@ -31,7 +31,7 @@ public class ProduitView {
             System.out.println("4- Lister tous les produits");
             System.out.println("0- Retour");
             System.out.print("Votre choix: ");
-            
+
             try {
                 choix = scanner.nextInt();
                 scanner.nextLine();
@@ -74,7 +74,7 @@ public class ProduitView {
             System.out.println("4- Archiver un burger");
             System.out.println("0- Retour");
             System.out.print("Votre choix: ");
-            
+
             try {
                 choix = scanner.nextInt();
                 scanner.nextLine();
@@ -105,7 +105,7 @@ public class ProduitView {
     private void ajouterBurger() {
         // FEATURE: Ajouter un burger - saisie et sauvegarde d'un `Burger`
         System.out.println("\n--- Ajouter un burger ---");
-        
+
         String nom;
         do {
             System.out.print("Nom: ");
@@ -118,7 +118,7 @@ public class ProduitView {
                 nom = null;
             }
         } while (nom == null);
-        
+
         double prix;
         do {
             System.out.print("Prix (FCFA): ");
@@ -128,21 +128,21 @@ public class ProduitView {
                 System.out.println(core.ValidationUtil.getPrixErrorMessage());
             }
         } while (!core.ValidationUtil.isValidPrix(prix));
-        
+
         System.out.print("Description: ");
         String description = scanner.nextLine();
         System.out.print("Ingredients: ");
         String ingredients = scanner.nextLine();
-        
+
         String imageUrl = null;
         System.out.print("Chemin complet de l'image (ex: C:/images/burger.jpg): ");
         String cheminImage = scanner.nextLine();
-        
+
         File imageFile = new File(cheminImage);
         if (imageFile.exists() && imageFile.isFile()) {
             CloudinaryService cloudinaryService = new CloudinaryServiceImpl();
             imageUrl = cloudinaryService.uploadImage(imageFile, "burgers");
-            
+
             if (imageUrl == null) {
                 System.out.println("Erreur d'upload. Utilisation du nom de fichier local.");
                 imageUrl = imageFile.getName();
@@ -185,7 +185,8 @@ public class ProduitView {
     }
 
     private void modifierBurger() {
-        // FEATURE: Modifier un burger - permet de mettre a jour les informations d'un burger
+        // FEATURE: Modifier un burger - permet de mettre a jour les informations d'un
+        // burger
         listerBurgers();
         System.out.print("\nID du burger a modifier: ");
         int id = scanner.nextInt();
@@ -197,19 +198,23 @@ public class ProduitView {
 
             System.out.print("Nouveau nom (" + burger.getNom() + "): ");
             String nom = scanner.nextLine();
-            if (!nom.isEmpty()) burger.setNom(nom);
+            if (!nom.isEmpty())
+                burger.setNom(nom);
 
             System.out.print("Nouveau prix (" + burger.getPrix() + "): ");
             String prixStr = scanner.nextLine();
-            if (!prixStr.isEmpty()) burger.setPrix(Double.parseDouble(prixStr));
+            if (!prixStr.isEmpty())
+                burger.setPrix(Double.parseDouble(prixStr));
 
             System.out.print("Nouvelle description: ");
             String desc = scanner.nextLine();
-            if (!desc.isEmpty()) burger.setDescription(desc);
+            if (!desc.isEmpty())
+                burger.setDescription(desc);
 
             System.out.print("Nouveaux ingredients: ");
             String ing = scanner.nextLine();
-            if (!ing.isEmpty()) burger.setIngredients(ing);
+            if (!ing.isEmpty())
+                burger.setIngredients(ing);
 
             produitService.update(burger);
             System.out.println("Burger modifie avec succes!");
@@ -219,7 +224,8 @@ public class ProduitView {
     }
 
     private void menuComplements() {
-        // FEATURE: Gestion des complements - menu pour ajouter/lister/archiver complements
+        // FEATURE: Gestion des complements - menu pour ajouter/lister/archiver
+        // complements
         int choix;
         do {
             System.out.println("\n--- COMPLEMENTS ---");
@@ -231,7 +237,7 @@ public class ProduitView {
             System.out.println("6- Archiver un complement");
             System.out.println("0- Retour");
             System.out.print("Votre choix: ");
-            
+
             try {
                 choix = scanner.nextInt();
                 scanner.nextLine();
@@ -266,9 +272,10 @@ public class ProduitView {
     }
 
     private void ajouterComplement(TypeComplement type) {
-        // FEATURE: Ajouter un complement - saisie et sauvegarde d'un item de type Complement
+        // FEATURE: Ajouter un complement - saisie et sauvegarde d'un item de type
+        // Complement
         System.out.println("\n--- Ajouter " + type + " ---");
-        
+
         String nom;
         do {
             System.out.print("Nom: ");
@@ -284,7 +291,7 @@ public class ProduitView {
                 nom = null;
             }
         } while (nom == null);
-        
+
         double prix;
         do {
             System.out.print("Prix (FCFA): ");
@@ -294,17 +301,17 @@ public class ProduitView {
                 System.out.println(core.ValidationUtil.getPrixErrorMessage());
             }
         } while (!core.ValidationUtil.isValidPrix(prix));
-        
+
         String imageUrl = null;
         System.out.print("Chemin complet de l'image (ex: C:/images/" + type.toString().toLowerCase() + ".jpg): ");
         String cheminImage = scanner.nextLine();
-        
+
         File imageFile = new File(cheminImage);
         if (imageFile.exists() && imageFile.isFile()) {
             CloudinaryService cloudinaryService = new CloudinaryServiceImpl();
             String folder = type.toString().toLowerCase() + "s";
             imageUrl = cloudinaryService.uploadImage(imageFile, folder);
-            
+
             if (imageUrl == null) {
                 System.out.println("Erreur d'upload. Utilisation du nom de fichier local.");
                 imageUrl = imageFile.getName();
@@ -359,7 +366,7 @@ public class ProduitView {
             System.out.println("3- Archiver un menu");
             System.out.println("0- Retour");
             System.out.print("Votre choix: ");
-            
+
             try {
                 choix = scanner.nextInt();
                 scanner.nextLine();
@@ -385,9 +392,10 @@ public class ProduitView {
     }
 
     private void creerMenu() {
-        // FEATURE: Créer un menu - permet de créer un `Menu` en choisissant burger, boisson et frites
+        // FEATURE: Créer un menu - permet de créer un `Menu` en choisissant burger,
+        // boisson et frites
         System.out.println("\n--- Creer un menu ---");
-        
+
         String nom;
         do {
             System.out.print("Nom du menu: ");
@@ -439,12 +447,12 @@ public class ProduitView {
             String imageUrl = null;
             System.out.print("Chemin complet de l'image (ex: C:/images/menu.jpg): ");
             String cheminImage = scanner.nextLine();
-            
+
             File imageFile = new File(cheminImage);
             if (imageFile.exists() && imageFile.isFile()) {
                 CloudinaryService cloudinaryService = new CloudinaryServiceImpl();
                 imageUrl = cloudinaryService.uploadImage(imageFile, "menus");
-                
+
                 if (imageUrl == null) {
                     System.out.println("Erreur d'upload. Utilisation du nom de fichier local.");
                     imageUrl = imageFile.getName();
@@ -453,7 +461,7 @@ public class ProduitView {
                 System.out.println("Fichier introuvable: " + cheminImage);
                 imageUrl = "default_menu.jpg";
             }
-            
+
             Menu menu = new Menu();
             menu.setNom(nom.trim());
             menu.setBurger((Burger) burgerOpt.get());

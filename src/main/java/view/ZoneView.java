@@ -35,7 +35,7 @@ public class ZoneView {
             System.out.println("6- Supprimer une zone");
             System.out.println("0- Retour");
             System.out.print("Votre choix: ");
-            
+
             try {
                 choix = scanner.nextInt();
                 scanner.nextLine();
@@ -76,7 +76,7 @@ public class ZoneView {
 
     private void ajouterZone() {
         System.out.println("\n--- Ajouter une zone ---");
-        
+
         String nom;
         do {
             System.out.print("Nom de la zone: ");
@@ -92,7 +92,7 @@ public class ZoneView {
                 nom = null;
             }
         } while (nom == null);
-        
+
         double prix;
         do {
             System.out.print("Prix de livraison (FCFA): ");
@@ -138,14 +138,16 @@ public class ZoneView {
         Optional<Zone> opt = zoneService.getById(id);
         if (opt.isPresent()) {
             Zone zone = opt.get();
-            
+
             System.out.print("Nouveau nom (" + zone.getNom() + "): ");
             String nom = scanner.nextLine();
             if (!nom.isEmpty()) {
-                if (nom.trim().length() >= 2 && nom.trim().length() <= 100 && nom.trim().matches("[a-zA-ZÀ-ÿ0-9\\s'-]+")) {
+                if (nom.trim().length() >= 2 && nom.trim().length() <= 100
+                        && nom.trim().matches("[a-zA-ZÀ-ÿ0-9\\s'-]+")) {
                     zone.setNom(nom.trim());
                 } else {
-                    System.out.println("Nom invalide! Doit contenir entre 2 et 100 caracteres (lettres, chiffres, espaces).");
+                    System.out.println(
+                            "Nom invalide! Doit contenir entre 2 et 100 caracteres (lettres, chiffres, espaces).");
                 }
             }
 
