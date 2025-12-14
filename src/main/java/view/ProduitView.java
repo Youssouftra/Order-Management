@@ -504,6 +504,7 @@ public class ProduitView {
     }
 
     private void archiverProduit() {
+        // FEATURE: Archiver produit - marque un produit comme archivé
         listerTousProduits();
         System.out.print("\nID du produit a archiver: ");
         int id = scanner.nextInt();
