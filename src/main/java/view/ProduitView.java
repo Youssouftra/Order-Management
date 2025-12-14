@@ -476,6 +476,8 @@ public class ProduitView {
         if (menus.isEmpty()) {
             System.out.println("Aucun menu enregistre.");
         } else {
+            // FEATURE: Lister les menus - affiche le nombre de menus
+            System.out.println("Nombre de menus: " + menus.size());
             for (Produit p : menus) {
                 Menu m = (Menu) p;
                 System.out.println(m);
