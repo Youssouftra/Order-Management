@@ -1,0 +1,285 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Accueil";
+}
+
+<div class="home-container">
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title"><span class="text-white">Brasil</span> <span class="text-orange">Burger</span></h1>
+            <p class="hero-subtitle">Decouvrez nos burgers artisanaux prepares avec des ingredients frais et de qualite</p>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un burger, menu...">
+            </div>
+        </div>
+    </section>
+
+    @if (Model.Burgers.Any())
+    {
+        <section class="popular-section">
+            <h2 class="section-title"><i class="fas fa-fire text-orange me-2"></i>Les plus populaires</h2>
+            <div class="popular-grid">
+                @foreach (var burger in Model.Burgers.Take(3))
+                {
+                    <div class="popular-card">
+                        <div class="popular-image">
+                            <img src="@(burger.Image ?? "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300")" alt="@burger.Nom">
+                        </div>
+                        <div class="popular-info">
+                            <h4>@burger.Nom</h4>
+                            <p class="popular-desc">Notre signature avec des ingredients frais</p>
+                            <span class="popular-price">@burger.Prix.ToString("N0") FCFA</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    <section class="catalogue-section">
+        <div class="catalogue-header">
+            <div>
+                <h2 class="section-title">Notre Carte</h2>
+                <p class="section-subtitle">@(Model.Burgers.Count + Model.Menus.Count + Model.Complements.Count) produits disponibles</p>
+            </div>
+            <div class="filter-buttons">
+                <a href="?filter=tous" class="filter-btn @(Model.Filter == "tous" ? "active" : "")">
+                    <i class="fas fa-th-large"></i> Tous
+                </a>
+                <a href="?filter=burger" class="filter-btn @(Model.Filter == "burger" ? "active" : "")">
+                    <i class="fas fa-hamburger"></i> Burgers
+                </a>
+                <a href="?filter=menu" class="filter-btn @(Model.Filter == "menu" ? "active" : "")">
+                    <i class="fas fa-utensils"></i> Menus
+                </a>
+                <a href="?filter=complement" class="filter-btn @(Model.Filter == "complement" ? "active" : "")">
+                    <i class="fas fa-cookie"></i> Complements
+                </a>
+            </div>
+        </div>
+
+        <div class="products-grid" id="productsGrid">
+            @if (Model.Filter == "tous" || Model.Filter == "burger")
+            {
+                @foreach (var burger in Model.Burgers)
+                {
+                    <div class="product-card searchable" data-name="@burger.Nom.ToLower()">
+                        <div class="product-image">
+                            <img src="@(burger.Image ?? "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300")" alt="@burger.Nom">
+                            <span class="product-badge">Burger</span>
+                        </div>
+                        <div class="product-info">
+                            <h5 class="product-name">@burger.Nom</h5>
+                            <p class="product-desc">Burger artisanal</p>
+                            <div class="product-footer">
+                                <span class="product-price">@burger.Prix.ToString("N0") FCFA</span>
+                                <button type="button" class="btn-add" onclick="openBurgerModal(@burger.Id, '@burger.Nom', @burger.Prix, '@(burger.Image ?? "")')">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if (Model.Filter == "tous" || Model.Filter == "menu")
+            {
+                @foreach (var menu in Model.Menus)
+                {
+                    <div class="product-card searchable" data-name="@menu.Nom.ToLower()">
+                        <div class="product-image">
+                            <img src="@(menu.Image ?? "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=300")" alt="@menu.Nom">
+                            <span class="product-badge badge-menu">Menu</span>
+                        </div>
+                        <div class="product-info">
+                            <h5 class="product-name">@menu.Nom</h5>
+                            <p class="product-desc">Menu complet</p>
+                            <div class="product-footer">
+                                <span class="product-price">@menu.Prix.ToString("N0") FCFA</span>
+                                <form asp-controller="Cart" asp-action="AddMenu" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@menu.Id" />
+                                    <button type="submit" class="btn-add">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+            @if (Model.Filter == "tous" || Model.Filter == "complement")
+            {
+                @foreach (var complement in Model.Complements)
+                {
+                    <div class="product-card searchable" data-name="@complement.Nom.ToLower()">
+                        <div class="product-image">
+                            <img src="@(complement.Image ?? "https://images.unsplash.com/photo-1630384060421-cb20aed1f37a?w=300")" alt="@complement.Nom">
+                            <span class="product-badge badge-complement">Complement</span>
+                        </div>
+                        <div class="product-info">
+                            <h5 class="product-name">@complement.Nom</h5>
+                            <p class="product-desc">Accompagnement</p>
+                            <div class="product-footer">
+                                <span class="product-price">@complement.Prix.ToString("N0") FCFA</span>
+                                <form asp-controller="Cart" asp-action="AddComplement" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@complement.Id" />
+                                    <button type="submit" class="btn-add">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="burgerModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="burgerModalTitle">Personnaliser votre commande</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <img id="burgerModalImage" src="" alt="" class="img-fluid rounded">
+                        <h4 class="mt-3" id="burgerModalName"></h4>
+                        <p class="text-orange" id="burgerModalPrice"></p>
+                    </div>
+                    <div class="col-md-7">
+                        <h5 class="mb-3"><i class="fas fa-plus-circle text-orange me-2"></i>Ajouter des complements</h5>
+                        <div id="complementsList" class="complements-list">
+                            @foreach (var complement in Model.Complements)
+                            {
+                                <div class="complement-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input complement-checkbox" type="checkbox" 
+                                               id="comp_@complement.Id" 
+                                               data-id="@complement.Id"
+                                               data-nom="@complement.Nom"
+                                               data-prix="@complement.Prix"
+                                               data-image="@(complement.Image ?? "")">
+                                        <label class="form-check-label" for="comp_@complement.Id">
+                                            <span class="complement-name">@complement.Nom</span>
+                                            <span class="complement-price">+@complement.Prix.ToString("N0") FCFA</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <hr class="border-secondary">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Quantite:</span>
+                            <div class="quantity-selector">
+                                <button type="button" class="btn btn-sm btn-outline-orange" onclick="decreaseQty()">-</button>
+                                <span id="burgerQty" class="mx-3">1</span>
+                                <button type="button" class="btn btn-sm btn-outline-orange" onclick="increaseQty()">+</button>
+                            </div>
+                        </div>
+                        <div class="total-section">
+                            <span>Total:</span>
+                            <span class="total-price text-orange" id="totalPrice">0 FCFA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-orange" onclick="addToCartWithComplements()">
+                    <i class="fas fa-cart-plus me-2"></i>Ajouter au panier
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="addBurgerForm" asp-controller="Cart" asp-action="AddBurgerWithComplements" method="post" style="display:none;">
+    <input type="hidden" name="burgerId" id="formBurgerId" />
+    <input type="hidden" name="quantite" id="formQuantite" />
+    <input type="hidden" name="complementIds" id="formComplementIds" />
+</form>
+
+@section Scripts {
+<script>
+    var currentBurger = { id: 0, nom: '', prix: 0, image: '' };
+    var burgerQty = 1;
+    var burgerModal;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        burgerModal = new bootstrap.Modal(document.getElementById('burgerModal'));
+        
+        document.getElementById('searchInput').addEventListener('input', function() {
+            var searchTerm = this.value.toLowerCase();
+            document.querySelectorAll('.searchable').forEach(function(card) {
+                var name = card.dataset.name;
+                if (name.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    function openBurgerModal(id, nom, prix, image) {
+        currentBurger = { id: id, nom: nom, prix: prix, image: image };
+        burgerQty = 1;
+        
+        document.getElementById('burgerModalName').textContent = nom;
+        document.getElementById('burgerModalPrice').textContent = prix.toLocaleString('fr-FR') + ' FCFA';
+        document.getElementById('burgerModalImage').src = image || 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300';
+        document.getElementById('burgerQty').textContent = '1';
+        
+        document.querySelectorAll('.complement-checkbox').forEach(function(cb) {
+            cb.checked = false;
+        });
+        
+        updateTotal();
+        burgerModal.show();
+    }
+
+    function increaseQty() {
+        burgerQty++;
+        document.getElementById('burgerQty').textContent = burgerQty;
+        updateTotal();
+    }
+
+    function decreaseQty() {
+        if (burgerQty > 1) {
+            burgerQty--;
+            document.getElementById('burgerQty').textContent = burgerQty;
+            updateTotal();
+        }
+    }
+
+    function updateTotal() {
+        var total = currentBurger.prix * burgerQty;
+        document.querySelectorAll('.complement-checkbox:checked').forEach(function(cb) {
+            total += parseFloat(cb.dataset.prix) * burgerQty;
+        });
+        document.getElementById('totalPrice').textContent = total.toLocaleString('fr-FR') + ' FCFA';
+    }
+
+    document.querySelectorAll('.complement-checkbox').forEach(function(cb) {
+        cb.addEventListener('change', updateTotal);
+    });
+
+    function addToCartWithComplements() {
+        var complementIds = [];
+        document.querySelectorAll('.complement-checkbox:checked').forEach(function(cb) {
+            complementIds.push(cb.dataset.id);
+        });
+        
+        document.getElementById('formBurgerId').value = currentBurger.id;
+        document.getElementById('formQuantite').value = burgerQty;
+        document.getElementById('formComplementIds').value = complementIds.join(',');
+        document.getElementById('addBurgerForm').submit();
+    }
+</script>
+}
