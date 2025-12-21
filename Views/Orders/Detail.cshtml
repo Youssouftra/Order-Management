@@ -1,0 +1,148 @@
+@model Commande
+@{
+    ViewData["Title"] = "Detail Commande #" + Model.Id;
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <a asp-action="List" class="btn btn-link text-orange mb-3">
+                <i class="fas fa-arrow-left"></i> Retour aux commandes
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="order-detail-card">
+                <div class="order-detail-header">
+                    <div>
+                        <h3>Commande #@Model.Id</h3>
+                        <span class="text-muted">@Model.DateCommande.ToString("dd MMMM yyyy à HH:mm")</span>
+                    </div>
+                    <span class="order-status @GetStatusClass(Model.Etat)">@GetStatusText(Model.Etat)</span>
+                </div>
+
+                <div class="order-detail-section">
+                    <h5>Articles commandes</h5>
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="order-detail-item">
+                            <div class="order-detail-item-image">
+                                @if (!string.IsNullOrEmpty(item.ImageItem))
+                                {
+                                    <img src="@item.ImageItem" alt="@item.NomItem">
+                                }
+                                else
+                                {
+                                    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=80" alt="@item.NomItem">
+                                }
+                            </div>
+                            <div class="order-detail-item-info">
+                                <h6>@item.NomItem</h6>
+                                <span class="badge bg-secondary">@item.TypeItem</span>
+                            </div>
+                            <div class="order-detail-item-qty">x@item.Quantite</div>
+                            <div class="order-detail-item-price">@((item.Prix * item.Quantite).ToString("N0")) FCFA</div>
+                        </div>
+                    }
+                </div>
+
+                @if (Model.TypeCommande == "LIVRAISON" && Model.Zone != null)
+                {
+                    <div class="order-detail-section">
+                        <h5>Livraison</h5>
+                        <div class="delivery-info">
+                            <div>
+                                <i class="fas fa-map-marker-alt text-orange me-2"></i>
+                                <strong>@Model.Zone.Nom</strong>
+                            </div>
+                            @if (!string.IsNullOrEmpty(Model.AdresseLivraison))
+                            {
+                                <div class="mt-2 text-muted">@Model.AdresseLivraison</div>
+                            }
+                            <div class="mt-2">
+                                <span class="text-muted">Frais de livraison:</span>
+                                <span class="text-orange">@Model.Zone.PrixLivraison.ToString("N0") FCFA</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (Model.Paiement != null)
+                {
+                    <div class="order-detail-section">
+                        <h5>Paiement</h5>
+                        <div class="payment-info">
+                            <div>
+                                <i class="fas fa-credit-card text-orange me-2"></i>
+                                <strong>@Model.Paiement.Mode</strong>
+                            </div>
+                            <div class="text-muted mt-1">Paye le @Model.Paiement.DatePaiement.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="cart-summary">
+                <h4>Resume</h4>
+                <hr>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Sous-total</span>
+                    <span>@((Model.Total - (Model.Zone?.PrixLivraison ?? 0)).ToString("N0")) FCFA</span>
+                </div>
+                @if (Model.TypeCommande == "LIVRAISON" && Model.Zone != null)
+                {
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Livraison</span>
+                        <span>@Model.Zone.PrixLivraison.ToString("N0") FCFA</span>
+                    </div>
+                }
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <strong>Total</strong>
+                    <strong class="text-orange">@Model.Total.ToString("N0") FCFA</strong>
+                </div>
+
+                <div class="order-timeline mt-4">
+                    <div class="timeline-item @(Model.Etat != "ANNULE" ? "active" : "")">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Commande passee</span>
+                    </div>
+                    <div class="timeline-item @(Model.Etat == "VALIDE" || Model.Etat == "TERMINE" ? "active" : "")">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Paiement valide</span>
+                    </div>
+                    <div class="timeline-item @(Model.Etat == "TERMINE" ? "active" : "")">
+                        <i class="fas fa-check-circle"></i>
+                        <span>@(Model.TypeCommande == "LIVRAISON" ? "Livree" : "Servie")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetStatusClass(string etat) {
+        return etat switch {
+            "EN_COURS" => "status-pending",
+            "VALIDE" => "status-validated",
+            "TERMINE" => "status-completed",
+            "ANNULE" => "status-cancelled",
+            _ => ""
+        };
+    }
+
+    string GetStatusText(string etat) {
+        return etat switch {
+            "EN_COURS" => "En cours",
+            "VALIDE" => "Validee",
+            "TERMINE" => "Terminee",
+            "ANNULE" => "Annulee",
+            _ => etat
+        };
+    }
+}

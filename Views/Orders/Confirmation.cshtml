@@ -1,0 +1,60 @@
+@model Commande
+@{
+    ViewData["Title"] = "Commande confirmee";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="confirmation-card text-center">
+                <div class="confirmation-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Commande confirmee!</h2>
+                <p class="text-muted">Merci pour votre commande</p>
+                
+                <div class="confirmation-details">
+                    <div class="confirmation-row">
+                        <span>Numero de commande</span>
+                        <strong>#@Model.Id</strong>
+                    </div>
+                    <div class="confirmation-row">
+                        <span>Total</span>
+                        <strong class="text-orange">@Model.Total.ToString("N0") FCFA</strong>
+                    </div>
+                    <div class="confirmation-row">
+                        <span>Mode</span>
+                        <strong>@GetTypeText(Model.TypeCommande)</strong>
+                    </div>
+                    @if (Model.TypeCommande == "LIVRAISON" && Model.Zone != null)
+                    {
+                        <div class="confirmation-row">
+                            <span>Zone</span>
+                            <strong>@Model.Zone.Nom</strong>
+                        </div>
+                    }
+                </div>
+
+                <div class="confirmation-actions">
+                    <a asp-action="Detail" asp-route-id="@Model.Id" class="btn btn-outline-orange">
+                        <i class="fas fa-eye me-2"></i>Voir les details
+                    </a>
+                    <a href="/" class="btn btn-orange">
+                        <i class="fas fa-home me-2"></i>Retour a l'accueil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    string GetTypeText(string type) {
+        return type switch {
+            "SUR_PLACE" => "Sur place",
+            "A_EMPORTER" => "A emporter",
+            "LIVRAISON" => "Livraison",
+            _ => type
+        };
+    }
+}

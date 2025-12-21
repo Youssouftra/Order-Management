@@ -1,0 +1,297 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Finaliser la commande";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <a href="/Cart" class="btn btn-link text-orange mb-3">
+                <i class="fas fa-arrow-left"></i> Retour au panier
+            </a>
+        </div>
+    </div>
+
+    <form asp-action="ProcessOrder" method="post" id="checkout-form">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="checkout-section">
+                    <h4><i class="fas fa-truck me-2"></i>Mode de consommation</h4>
+                    <div class="type-options">
+                        <div class="type-option">
+                            <input type="radio" name="typeCommande" value="SUR_PLACE" id="surplace" checked>
+                            <label for="surplace">
+                                <i class="fas fa-utensils"></i>
+                                <span>Sur place</span>
+                            </label>
+                        </div>
+                        <div class="type-option">
+                            <input type="radio" name="typeCommande" value="A_EMPORTER" id="emporter">
+                            <label for="emporter">
+                                <i class="fas fa-shopping-bag"></i>
+                                <span>A emporter</span>
+                            </label>
+                        </div>
+                        <div class="type-option">
+                            <input type="radio" name="typeCommande" value="LIVRAISON" id="livraison">
+                            <label for="livraison">
+                                <i class="fas fa-motorcycle"></i>
+                                <span>Livraison</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="checkout-section" id="livraison-section" style="display: none;">
+                    <h4><i class="fas fa-map-marker-alt me-2"></i>Adresse de livraison</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Zone de livraison</label>
+                        <select name="zoneId" id="zoneId" class="form-select">
+                            <option value="">Selectionnez une zone</option>
+                            @foreach (var zone in Model.Zones)
+                            {
+                                <option value="@zone.Id" data-prix="@zone.PrixLivraison">@zone.Nom (@zone.PrixLivraison.ToString("N0") FCFA)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Adresse complete</label>
+                        <textarea name="adresseLivraison" class="form-control" rows="3" placeholder="Entrez votre adresse de livraison..."></textarea>
+                    </div>
+                </div>
+
+                <div class="checkout-section">
+                    <h4><i class="fas fa-credit-card me-2"></i>Mode de paiement</h4>
+                    <div class="payment-options">
+                        <div class="payment-option">
+                            <input type="radio" name="modePaiement" value="WAVE" id="wave" checked>
+                            <label for="wave">
+                                <img src="~/images/wave.jpg" alt="Wave" style="height: 40px; object-fit: contain;">
+                                <span>Wave</span>
+                            </label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" name="modePaiement" value="OM" id="om">
+                            <label for="om">
+                                <img src="~/images/orange_money.png" alt="Orange Money" style="height: 40px; object-fit: contain;">
+                                <span>Orange Money</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Numero de telephone pour le paiement</label>
+                        <input type="tel" name="telephone" id="telephone" class="form-control" placeholder="77 123 45 67" required>
+                        <small class="text-muted">Le numero associe a votre compte Wave ou Orange Money</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <h4>Recapitulatif</h4>
+                    <hr>
+                    @foreach (var item in Model.CartItems)
+                    {
+                        <div class="summary-item">
+                            <div class="d-flex align-items-center gap-2">
+                                @if (!string.IsNullOrEmpty(item.Image))
+                                {
+                                    <img src="@item.Image" alt="@item.Nom" class="summary-item-img">
+                                }
+                                <div>
+                                    <div class="small">@item.Nom</div>
+                                    <div class="text-muted small">x@item.Quantite</div>
+                                </div>
+                            </div>
+                            <span>@((item.Prix * item.Quantite).ToString("N0")) FCFA</span>
+                        </div>
+                    }
+                    <hr>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Sous-total</span>
+                        <span id="sous-total">@Model.SousTotal.ToString("N0") FCFA</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2" id="frais-livraison-row" style="display: none;">
+                        <span>Frais de livraison</span>
+                        <span id="frais-livraison">0 FCFA</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <strong>Total</strong>
+                        <strong class="text-orange" id="total">@Model.Total.ToString("N0") FCFA</strong>
+                    </div>
+                    <button type="button" class="btn btn-orange w-100" onclick="showPaymentModal()">
+                        <i class="fas fa-check me-2"></i>Payer maintenant
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">
+                    <span id="modal-payment-icon"></span>
+                    Confirmation de paiement
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div id="payment-processing" style="display: none;">
+                    <div class="spinner-border text-orange mb-3" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <p>Traitement du paiement en cours...</p>
+                    <p class="text-muted small">Veuillez patienter</p>
+                </div>
+                <div id="payment-confirm">
+                    <div class="mb-3">
+                        <img id="modal-payment-logo" src="" alt="" style="height: 60px;">
+                    </div>
+                    <p class="mb-2">Vous allez payer</p>
+                    <h2 class="text-orange mb-3" id="modal-amount"></h2>
+                    <p class="text-muted mb-3">via <span id="modal-payment-method"></span></p>
+                    <p class="mb-0">Numero: <strong id="modal-phone"></strong></p>
+                </div>
+                <div id="payment-success" style="display: none;">
+                    <div class="text-success mb-3">
+                        <i class="fas fa-check-circle fa-4x"></i>
+                    </div>
+                    <h4 class="text-success">Paiement reussi!</h4>
+                    <p class="text-muted">Reference: <span id="payment-reference"></span></p>
+                    <p>Votre commande a ete confirmee.</p>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary" id="modal-footer-buttons">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-orange" onclick="processPayment()">
+                    <i class="fas fa-lock me-2"></i>Confirmer le paiement
+                </button>
+            </div>
+            <div class="modal-footer border-secondary" id="modal-footer-success" style="display: none;">
+                <button type="button" class="btn btn-orange w-100" onclick="submitOrder()">
+                    <i class="fas fa-check me-2"></i>Voir ma commande
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var sousTotal = @Model.SousTotal;
+    var paymentModal;
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    });
+    
+    document.querySelectorAll('input[name="typeCommande"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            var livraisonSection = document.getElementById('livraison-section');
+            var fraisRow = document.getElementById('frais-livraison-row');
+            if (this.value === 'LIVRAISON') {
+                livraisonSection.style.display = 'block';
+                fraisRow.style.display = 'flex';
+                updateTotal();
+            } else {
+                livraisonSection.style.display = 'none';
+                fraisRow.style.display = 'none';
+                document.getElementById('total').textContent = sousTotal.toLocaleString('fr-FR') + ' FCFA';
+            }
+        });
+    });
+
+    document.getElementById('zoneId').addEventListener('change', function() {
+        updateTotal();
+    });
+
+    function updateTotal() {
+        var zoneSelect = document.getElementById('zoneId');
+        var selectedOption = zoneSelect.options[zoneSelect.selectedIndex];
+        var frais = selectedOption.dataset.prix ? parseFloat(selectedOption.dataset.prix) : 0;
+        
+        document.getElementById('frais-livraison').textContent = frais.toLocaleString('fr-FR') + ' FCFA';
+        document.getElementById('total').textContent = (sousTotal + frais).toLocaleString('fr-FR') + ' FCFA';
+    }
+
+    function getTotal() {
+        var typeCommande = document.querySelector('input[name="typeCommande"]:checked').value;
+        if (typeCommande === 'LIVRAISON') {
+            var zoneSelect = document.getElementById('zoneId');
+            var selectedOption = zoneSelect.options[zoneSelect.selectedIndex];
+            var frais = selectedOption.dataset.prix ? parseFloat(selectedOption.dataset.prix) : 0;
+            return sousTotal + frais;
+        }
+        return sousTotal;
+    }
+
+    function showPaymentModal() {
+        var telephone = document.getElementById('telephone').value;
+        if (!telephone) {
+            alert('Veuillez entrer votre numero de telephone');
+            return;
+        }
+
+        var typeCommande = document.querySelector('input[name="typeCommande"]:checked').value;
+        if (typeCommande === 'LIVRAISON') {
+            var zoneId = document.getElementById('zoneId').value;
+            var adresse = document.querySelector('textarea[name="adresseLivraison"]').value;
+            if (!zoneId) {
+                alert('Veuillez selectionner une zone de livraison');
+                return;
+            }
+            if (!adresse) {
+                alert('Veuillez entrer votre adresse de livraison');
+                return;
+            }
+        }
+
+        var modePaiement = document.querySelector('input[name="modePaiement"]:checked').value;
+        var total = getTotal();
+
+        document.getElementById('modal-amount').textContent = total.toLocaleString('fr-FR') + ' FCFA';
+        document.getElementById('modal-phone').textContent = telephone;
+        
+        if (modePaiement === 'WAVE') {
+            document.getElementById('modal-payment-logo').src = '/images/wave.jpg';
+            document.getElementById('modal-payment-method').textContent = 'Wave';
+        } else {
+            document.getElementById('modal-payment-logo').src = '/images/orange_money.png';
+            document.getElementById('modal-payment-method').textContent = 'Orange Money';
+        }
+
+        document.getElementById('payment-confirm').style.display = 'block';
+        document.getElementById('payment-processing').style.display = 'none';
+        document.getElementById('payment-success').style.display = 'none';
+        document.getElementById('modal-footer-buttons').style.display = 'flex';
+        document.getElementById('modal-footer-success').style.display = 'none';
+
+        paymentModal.show();
+    }
+
+    function processPayment() {
+        document.getElementById('payment-confirm').style.display = 'none';
+        document.getElementById('payment-processing').style.display = 'block';
+        document.getElementById('modal-footer-buttons').style.display = 'none';
+
+        setTimeout(function() {
+            var modePaiement = document.querySelector('input[name="modePaiement"]:checked').value;
+            var prefix = modePaiement === 'WAVE' ? 'WV' : 'OM';
+            var reference = prefix + Date.now() + Math.floor(Math.random() * 1000);
+            
+            document.getElementById('payment-reference').textContent = reference;
+            document.getElementById('payment-processing').style.display = 'none';
+            document.getElementById('payment-success').style.display = 'block';
+            document.getElementById('modal-footer-success').style.display = 'block';
+        }, 2000);
+    }
+
+    function submitOrder() {
+        document.getElementById('checkout-form').submit();
+    }
+</script>
+}
