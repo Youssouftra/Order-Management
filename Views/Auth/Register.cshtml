@@ -1,0 +1,74 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Inscription";
+    Layout = "_AuthLayout";
+}
+
+<div class="auth-container">
+    <div class="auth-form-side">
+        <div class="auth-form-wrapper">
+            <div class="text-center mb-4">
+                <a href="/" class="auth-logo">
+                    <i class="fas fa-hamburger"></i>
+                    <span class="text-white">Brasil</span> <span class="text-orange">Burger</span>
+                </a>
+            </div>
+            
+            <h2 class="auth-title">Inscription</h2>
+            <p class="auth-subtitle">Creez votre compte</p>
+
+            <form asp-action="Register" method="post">
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nom</label>
+                        <input asp-for="Nom" class="form-control" placeholder="Votre nom">
+                        <span asp-validation-for="Nom" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Prenom</label>
+                        <input asp-for="Prenom" class="form-control" placeholder="Votre prenom">
+                        <span asp-validation-for="Prenom" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Telephone</label>
+                    <input asp-for="Telephone" class="form-control" placeholder="77 123 45 67">
+                    <span asp-validation-for="Telephone" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="votre@email.com">
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mot de passe</label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="********">
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Confirmer mot de passe</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="********">
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-orange w-100 mb-3">S'inscrire</button>
+
+                <p class="text-center text-muted">
+                    Deja un compte? <a asp-action="Login" class="text-orange">Se connecter</a>
+                </p>
+            </form>
+        </div>
+    </div>
+    <div class="auth-image-side">
+        <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=800" alt="Burger">
+        <div class="auth-image-overlay">
+            <h3>Des burgers <span class="text-orange">exceptionnels</span></h3>
+        </div>
+    </div>
+</div>
