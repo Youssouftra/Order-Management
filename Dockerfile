@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 COPY . .
-RUN dotnet publish -c Release -o out
+RUN dotnet publish BrasilBurger.Web.csproj -c Release -o out
 
 # Étape de runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
