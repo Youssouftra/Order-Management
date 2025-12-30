@@ -20,13 +20,13 @@
                     </div>
                     <div class="confirmation-row">
                         <span>Total</span>
-                        <strong class="text-orange">@Model.Total.ToString("N0") FCFA</strong>
+                        <strong class="text-orange">@Model.MontantTotal.ToString("N0") FCFA</strong>
                     </div>
                     <div class="confirmation-row">
                         <span>Mode</span>
-                        <strong>@GetTypeText(Model.TypeCommande)</strong>
+                        <strong>@GetTypeText(Model.TypeLivraison)</strong>
                     </div>
-                    @if (Model.TypeCommande == "LIVRAISON" && Model.Zone != null)
+                    @if (Model.TypeLivraison == "LIVRAISON" && Model.Zone != null)
                     {
                         <div class="confirmation-row">
                             <span>Zone</span>

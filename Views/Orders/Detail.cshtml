@@ -20,7 +20,7 @@
                         <h3>Commande #@Model.Id</h3>
                         <span class="text-muted">@Model.DateCommande.ToString("dd MMMM yyyy à HH:mm")</span>
                     </div>
-                    <span class="order-status @GetStatusClass(Model.Etat)">@GetStatusText(Model.Etat)</span>
+                    <span class="order-status @GetStatusClass(Model.Statut)">@GetStatusText(Model.Statut)</span>
                 </div>
 
                 <div class="order-detail-section">
@@ -40,15 +40,15 @@
                             </div>
                             <div class="order-detail-item-info">
                                 <h6>@item.NomItem</h6>
-                                <span class="badge bg-secondary">@item.TypeItem</span>
+                                <span class="badge bg-secondary">Produit</span>
                             </div>
                             <div class="order-detail-item-qty">x@item.Quantite</div>
-                            <div class="order-detail-item-price">@((item.Prix * item.Quantite).ToString("N0")) FCFA</div>
+                            <div class="order-detail-item-price">@((item.PrixUnitaire * item.Quantite).ToString("N0")) FCFA</div>
                         </div>
                     }
                 </div>
 
-                @if (Model.TypeCommande == "LIVRAISON" && Model.Zone != null)
+                @if (Model.TypeLivraison == "LIVRAISON" && Model.Zone != null)
                 {
                     <div class="order-detail-section">
                         <h5>Livraison</h5>
@@ -57,10 +57,6 @@
                                 <i class="fas fa-map-marker-alt text-orange me-2"></i>
                                 <strong>@Model.Zone.Nom</strong>
                             </div>
-                            @if (!string.IsNullOrEmpty(Model.AdresseLivraison))
-                            {
-                                <div class="mt-2 text-muted">@Model.AdresseLivraison</div>
-                            }
                             <div class="mt-2">
                                 <span class="text-muted">Frais de livraison:</span>
                                 <span class="text-orange">@Model.Zone.PrixLivraison.ToString("N0") FCFA</span>
@@ -76,7 +72,7 @@
                         <div class="payment-info">
                             <div>
                                 <i class="fas fa-credit-card text-orange me-2"></i>
-                                <strong>@Model.Paiement.Mode</strong>
+                                <strong>@Model.Paiement.ModePaiement</strong>
                             </div>
                             <div class="text-muted mt-1">Paye le @Model.Paiement.DatePaiement.ToString("dd/MM/yyyy HH:mm")</div>
                         </div>
@@ -91,9 +87,9 @@
                 <hr>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Sous-total</span>
-                    <span>@((Model.Total - (Model.Zone?.PrixLivraison ?? 0)).ToString("N0")) FCFA</span>
+                    <span>@((Model.MontantTotal - (Model.Zone?.PrixLivraison ?? 0)).ToString("N0")) FCFA</span>
                 </div>
-                @if (Model.TypeCommande == "LIVRAISON" && Model.Zone != null)
+                @if (Model.TypeLivraison == "LIVRAISON" && Model.Zone != null)
                 {
                     <div class="d-flex justify-content-between mb-2">
                         <span>Livraison</span>
@@ -103,21 +99,21 @@
                 <hr>
                 <div class="d-flex justify-content-between">
                     <strong>Total</strong>
-                    <strong class="text-orange">@Model.Total.ToString("N0") FCFA</strong>
+                    <strong class="text-orange">@Model.MontantTotal.ToString("N0") FCFA</strong>
                 </div>
 
                 <div class="order-timeline mt-4">
-                    <div class="timeline-item @(Model.Etat != "ANNULE" ? "active" : "")">
+                    <div class="timeline-item @(Model.Statut != "ANNULEE" ? "active" : "")">
                         <i class="fas fa-check-circle"></i>
                         <span>Commande passee</span>
                     </div>
-                    <div class="timeline-item @(Model.Etat == "VALIDE" || Model.Etat == "TERMINE" ? "active" : "")">
+                    <div class="timeline-item @(Model.Statut == "VALIDEE" || Model.Statut == "TERMINEE" ? "active" : "")">
                         <i class="fas fa-check-circle"></i>
                         <span>Paiement valide</span>
                     </div>
-                    <div class="timeline-item @(Model.Etat == "TERMINE" ? "active" : "")">
+                    <div class="timeline-item @(Model.Statut == "TERMINEE" ? "active" : "")">
                         <i class="fas fa-check-circle"></i>
-                        <span>@(Model.TypeCommande == "LIVRAISON" ? "Livree" : "Servie")</span>
+                        <span>@(Model.TypeLivraison == "LIVRAISON" ? "Livree" : "Servie")</span>
                     </div>
                 </div>
             </div>
@@ -126,23 +122,23 @@
 </div>
 
 @functions {
-    string GetStatusClass(string etat) {
-        return etat switch {
-            "EN_COURS" => "status-pending",
-            "VALIDE" => "status-validated",
-            "TERMINE" => "status-completed",
-            "ANNULE" => "status-cancelled",
+    string GetStatusClass(string statut) {
+        return statut switch {
+            "EN_ATTENTE" => "status-pending",
+            "VALIDEE" => "status-validated",
+            "TERMINEE" => "status-completed",
+            "ANNULEE" => "status-cancelled",
             _ => ""
         };
     }
 
-    string GetStatusText(string etat) {
-        return etat switch {
-            "EN_COURS" => "En cours",
-            "VALIDE" => "Validee",
-            "TERMINE" => "Terminee",
-            "ANNULE" => "Annulee",
-            _ => etat
+    string GetStatusText(string statut) {
+        return statut switch {
+            "EN_ATTENTE" => "En attente",
+            "VALIDEE" => "Validee",
+            "TERMINEE" => "Terminee",
+            "ANNULEE" => "Annulee",
+            _ => statut
         };
     }
 }

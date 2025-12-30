@@ -34,7 +34,7 @@
                             <span class="order-number">Commande #@commande.Id</span>
                             <span class="order-date">@commande.DateCommande.ToString("dd MMM yyyy HH:mm")</span>
                         </div>
-                        <span class="order-status @GetStatusClass(commande.Etat)">@GetStatusText(commande.Etat)</span>
+                        <span class="order-status @GetStatusClass(commande.Statut)">@GetStatusText(commande.Statut)</span>
                     </div>
                     <div class="order-body">
                         <div class="order-items">
@@ -58,10 +58,10 @@
                         </div>
                         <div class="order-info">
                             <div class="order-type">
-                                <i class="@GetTypeIcon(commande.TypeCommande)"></i>
-                                @GetTypeText(commande.TypeCommande)
+                                <i class="@GetTypeIcon(commande.TypeLivraison)"></i>
+                                @GetTypeText(commande.TypeLivraison)
                             </div>
-                            <div class="order-total">@commande.Total.ToString("N0") FCFA</div>
+                            <div class="order-total">@commande.MontantTotal.ToString("N0") FCFA</div>
                         </div>
                     </div>
                     <div class="order-footer">
@@ -76,23 +76,23 @@
 </div>
 
 @functions {
-    string GetStatusClass(string etat) {
-        return etat switch {
-            "EN_COURS" => "status-pending",
-            "VALIDE" => "status-validated",
-            "TERMINE" => "status-completed",
-            "ANNULE" => "status-cancelled",
+    string GetStatusClass(string statut) {
+        return statut switch {
+            "EN_ATTENTE" => "status-pending",
+            "VALIDEE" => "status-validated",
+            "TERMINEE" => "status-completed",
+            "ANNULEE" => "status-cancelled",
             _ => ""
         };
     }
 
-    string GetStatusText(string etat) {
-        return etat switch {
-            "EN_COURS" => "En cours",
-            "VALIDE" => "Validee",
-            "TERMINE" => "Terminee",
-            "ANNULE" => "Annulee",
-            _ => etat
+    string GetStatusText(string statut) {
+        return statut switch {
+            "EN_ATTENTE" => "En attente",
+            "VALIDEE" => "Validee",
+            "TERMINEE" => "Terminee",
+            "ANNULEE" => "Annulee",
+            _ => statut
         };
     }
 
