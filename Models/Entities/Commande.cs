@@ -10,26 +10,38 @@ public class Commande
     [Column("id")]
     public int Id { get; set; }
 
-    [Column("id_client")]
-    public int IdClient { get; set; }
-
-    [Column("type_commande")]
-    public string TypeCommande { get; set; } = string.Empty;
-
-    [Column("etat")]
-    public string Etat { get; set; } = "EN_COURS";
+    [Column("client_id")]
+    public int ClientId { get; set; }
 
     [Column("date_commande")]
     public DateTime DateCommande { get; set; }
 
-    [Column("total")]
-    public decimal Total { get; set; }
+    [Column("statut")]
+    public string Statut { get; set; } = "EN_ATTENTE";
 
-    [Column("id_zone")]
-    public int? IdZone { get; set; }
+    [Column("type_livraison")]
+    public string TypeLivraison { get; set; } = string.Empty;
 
-    [Column("adresse_livraison")]
-    public string? AdresseLivraison { get; set; }
+    [Column("quartier_id")]
+    public int? QuartierId { get; set; }
+
+    [Column("zone_id")]
+    public int? ZoneId { get; set; }
+
+    [Column("livreur_id")]
+    public int? LivreurId { get; set; }
+
+    [Column("montant_total")]
+    public decimal MontantTotal { get; set; }
+
+    [Column("frais_livraison")]
+    public decimal FraisLivraison { get; set; }
+
+    [Column("notes")]
+    public string? Notes { get; set; }
+
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; }
 
     [NotMapped]
     public List<CommandeItem> Items { get; set; } = new();

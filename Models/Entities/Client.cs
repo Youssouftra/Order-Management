@@ -20,8 +20,23 @@ public class Client
     public string Telephone { get; set; } = string.Empty;
 
     [Column("email")]
-    public string Email { get; set; } = string.Empty;
+    public string? Email { get; set; }
 
     [Column("mot_de_passe")]
-    public string Password { get; set; } = string.Empty;
+    public string MotDePasse { get; set; } = string.Empty;
+
+    [Column("adresse")]
+    public string? Adresse { get; set; }
+
+    [Column("quartier_id")]
+    public int? QuartierId { get; set; }
+
+    [Column("actif")]
+    public bool Actif { get; set; } = true;
+
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; }
+
+    [Column("updated_at")]
+    public DateTime UpdatedAt { get; set; }
 }
