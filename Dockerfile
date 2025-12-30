@@ -22,7 +22,11 @@ WORKDIR /var/www/html
 COPY . .
 
 # Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Clear and warmup cache
+RUN APP_ENV=prod php bin/console cache:clear --no-warmup --no-debug
+RUN APP_ENV=prod php bin/console cache:warmup --no-debug
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/var
