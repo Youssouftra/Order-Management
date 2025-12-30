@@ -19,25 +19,28 @@ public class CommandeService
     public async Task<Commande> CreateCommandeAsync(int clientId, List<CartItem> items, string typeCommande, int? zoneId, string? adresseLivraison)
     {
         decimal total = items.Sum(i => i.Prix * i.Quantite);
+        decimal fraisLivraison = 0;
 
         if (typeCommande == "LIVRAISON" && zoneId.HasValue)
         {
             var zone = await _context.Zones.FindAsync(zoneId.Value);
             if (zone != null)
             {
-                total += zone.PrixLivraison;
+                fraisLivraison = zone.PrixLivraison;
+                total += fraisLivraison;
             }
         }
 
         var commande = new Commande
         {
-            IdClient = clientId,
-            TypeCommande = typeCommande,
-            Etat = "EN_COURS",
+            ClientId = clientId,
+            TypeLivraison = typeCommande,
+            Statut = "EN_ATTENTE",
             DateCommande = DateTime.UtcNow,
-            Total = total,
-            IdZone = typeCommande == "LIVRAISON" ? zoneId : null,
-            AdresseLivraison = typeCommande == "LIVRAISON" ? adresseLivraison : null
+            CreatedAt = DateTime.UtcNow,
+            MontantTotal = total,
+            FraisLivraison = fraisLivraison,
+            ZoneId = typeCommande == "LIVRAISON" ? zoneId : null
         };
 
         _context.Commandes.Add(commande);
@@ -47,11 +50,12 @@ public class CommandeService
         {
             var commandeItem = new CommandeItem
             {
-                IdCommande = commande.Id,
-                TypeItem = item.Type.ToUpper(),
-                IdItem = item.Id,
+                CommandeId = commande.Id,
+                ProduitId = item.Id,
                 Quantite = item.Quantite,
-                Prix = item.Prix
+                PrixUnitaire = item.Prix,
+                SousTotal = item.Prix * item.Quantite,
+                CreatedAt = DateTime.UtcNow
             };
             _context.CommandeItems.Add(commandeItem);
         }
@@ -64,10 +68,12 @@ public class CommandeService
     {
         var paiement = new Paiement
         {
-            IdCommande = commandeId,
+            CommandeId = commandeId,
             DatePaiement = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow,
             Montant = montant,
-            Mode = mode
+            ModePaiement = mode,
+            Statut = "VALIDE"
         };
 
         _context.Paiements.Add(paiement);
@@ -75,7 +81,7 @@ public class CommandeService
         var commande = await _context.Commandes.FindAsync(commandeId);
         if (commande != null)
         {
-            commande.Etat = "VALIDE";
+            commande.Statut = "VALIDEE";
         }
 
         await _context.SaveChangesAsync();
@@ -85,18 +91,18 @@ public class CommandeService
     public async Task<List<Commande>> GetCommandesByClientAsync(int clientId)
     {
         var commandes = await _context.Commandes
-            .Where(c => c.IdClient == clientId)
+            .Where(c => c.ClientId == clientId)
             .OrderByDescending(c => c.DateCommande)
             .ToListAsync();
 
         foreach (var commande in commandes)
         {
             commande.Items = await GetCommandeItemsAsync(commande.Id);
-            if (commande.IdZone.HasValue)
+            if (commande.ZoneId.HasValue)
             {
-                commande.Zone = await _context.Zones.FindAsync(commande.IdZone.Value);
+                commande.Zone = await _context.Zones.FindAsync(commande.ZoneId.Value);
             }
-            commande.Paiement = await _context.Paiements.FirstOrDefaultAsync(p => p.IdCommande == commande.Id);
+            commande.Paiement = await _context.Paiements.FirstOrDefaultAsync(p => p.CommandeId == commande.Id);
         }
 
         return commandes;
@@ -108,11 +114,11 @@ public class CommandeService
         if (commande != null)
         {
             commande.Items = await GetCommandeItemsAsync(commande.Id);
-            if (commande.IdZone.HasValue)
+            if (commande.ZoneId.HasValue)
             {
-                commande.Zone = await _context.Zones.FindAsync(commande.IdZone.Value);
+                commande.Zone = await _context.Zones.FindAsync(commande.ZoneId.Value);
             }
-            commande.Paiement = await _context.Paiements.FirstOrDefaultAsync(p => p.IdCommande == commande.Id);
+            commande.Paiement = await _context.Paiements.FirstOrDefaultAsync(p => p.CommandeId == commande.Id);
         }
         return commande;
     }
@@ -120,36 +126,34 @@ public class CommandeService
     private async Task<List<CommandeItem>> GetCommandeItemsAsync(int commandeId)
     {
         var items = await _context.CommandeItems
-            .Where(ci => ci.IdCommande == commandeId)
+            .Where(ci => ci.CommandeId == commandeId)
             .ToListAsync();
 
         foreach (var item in items)
         {
-            if (item.TypeItem == "BURGER")
+            // Récupérer le nom du produit depuis la table produits
+            var burger = await _context.Burgers.FindAsync(item.ProduitId);
+            if (burger != null)
             {
-                var burger = await _context.Burgers.FindAsync(item.IdItem);
-                if (burger != null)
-                {
-                    item.NomItem = burger.Nom;
-                    item.ImageItem = burger.Image;
-                }
+                item.NomItem = burger.Nom;
+                item.ImageItem = burger.Image;
             }
-            else if (item.TypeItem == "MENU")
+            else
             {
-                var menu = await _context.Menus.FindAsync(item.IdItem);
+                var menu = await _context.Menus.FindAsync(item.ProduitId);
                 if (menu != null)
                 {
                     item.NomItem = menu.Nom;
                     item.ImageItem = menu.Image;
                 }
-            }
-            else if (item.TypeItem == "COMPLEMENT")
-            {
-                var complement = await _context.Complements.FindAsync(item.IdItem);
-                if (complement != null)
+                else
                 {
-                    item.NomItem = complement.Nom;
-                    item.ImageItem = complement.Image;
+                    var complement = await _context.Complements.FindAsync(item.ProduitId);
+                    if (complement != null)
+                    {
+                        item.NomItem = complement.Nom;
+                        item.ImageItem = complement.Image;
+                    }
                 }
             }
         }

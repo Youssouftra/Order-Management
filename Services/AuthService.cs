@@ -19,7 +19,7 @@ public class AuthService : IAuthService
     public async Task<Client?> LoginAsync(string email, string password)
     {
         var client = await _context.Clients.FirstOrDefaultAsync(c => c.Email == email);
-        if (client != null && BCrypt.Net.BCrypt.Verify(password, client.Password))
+        if (client != null && BCrypt.Net.BCrypt.Verify(password, client.MotDePasse))
         {
             return client;
         }
@@ -40,7 +40,9 @@ public class AuthService : IAuthService
             Prenom = prenom,
             Telephone = telephone,
             Email = email,
-            Password = BCrypt.Net.BCrypt.HashPassword(password)
+            MotDePasse = BCrypt.Net.BCrypt.HashPassword(password),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
 
         _context.Clients.Add(client);
