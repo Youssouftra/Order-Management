@@ -2,6 +2,6 @@
 # exit on error
 set -o errexit
 
-composer install --no-dev --optimize-autoloader
-php bin/console cache:clear --env=prod --no-warmup
-php bin/console cache:warmup --env=prod
+composer install --no-dev --optimize-autoloader --no-scripts
+php bin/console cache:clear --env=prod --no-warmup --no-debug
+php bin/console cache:warmup --env=prod --no-debug
