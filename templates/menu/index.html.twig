@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Menus{% endblock %}
+{% block page_title %}Menus{% endblock %}
+{% block page_subtitle %}{{ menus|length }} menu(s) actif(s){% endblock %}
+
+{% block body %}
+<div class="menus-page">
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <form method="get" action="{{ path('app_menu_index') }}" style="width: 100%;">
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher un menu..." value="{{ app.request.query.get('search') }}">
+                </form>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <a href="{{ path('app_menu_index', {status: app.request.query.get('status') == '0' ? '' : '0'}) }}" 
+               class="btn btn-outline {% if app.request.query.get('status') == '0' %}active{% endif %}">
+                <i class="bi bi-archive"></i> Voir archivés
+            </a>
+            <a href="{{ path('app_menu_new') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Ajouter
+            </a>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="product-grid">
+        {% for menu in menus %}
+            <div class="product-card">
+                {% if menu.image %}
+                    <img src="{{ menu.image }}" alt="{{ menu.nom }}" class="product-image">
+                {% else %}
+                    <div class="product-image-placeholder">
+                        <i class="bi bi-basket3-fill"></i>
+                    </div>
+                {% endif %}
+                <div class="product-body">
+                    <div class="product-header">
+                        <h3 class="product-name">{{ menu.nom }}</h3>
+                        <span class="product-price">{{ menu.prix|number_format(0, ',', ' ') }} F</span>
+                    </div>
+                    <p class="product-description">
+                        {% set components = [] %}
+                        {% for burger in menu.burgers %}
+                            {% set components = components|merge([burger.nom]) %}
+                        {% endfor %}
+                        {% for complement in menu.complements %}
+                            {% set components = components|merge([complement.nom]) %}
+                        {% endfor %}
+                        {{ components|join(' + ')|default(menu.description)|slice(0, 80) }}{% if (components|join(' + ')|default(menu.description))|length > 80 %}...{% endif %}
+                    </p>
+                </div>
+                <div class="product-footer">
+                    <a href="{{ path('app_menu_edit', {id: menu.id}) }}" class="btn btn-icon btn-outline" title="Modifier">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form action="{{ path('app_menu_toggle', {id: menu.id}) }}" method="post" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ menu.id) }}">
+                        <button type="submit" class="btn btn-icon btn-outline" title="{{ menu.isActive ? 'Désactiver' : 'Activer' }}">
+                            <i class="bi bi-{{ menu.isActive ? 'eye-slash' : 'eye' }}"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="bi bi-basket3"></i>
+                <h4>Aucun menu</h4>
+                <p>Commencez par créer votre premier menu</p>
+                <a href="{{ path('app_menu_new') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Créer un menu
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.totalPages|default(1) > 1 %}
+        <nav>
+            <ul class="pagination">
+                <li class="page-item {% if pagination.currentPage == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{{ path('app_menu_index', app.request.query.all|merge({page: pagination.currentPage - 1})) }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for i in 1..pagination.totalPages %}
+                    <li class="page-item {% if pagination.currentPage == i %}active{% endif %}">
+                        <a class="page-link" href="{{ path('app_menu_index', app.request.query.all|merge({page: i})) }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {% if pagination.currentPage == pagination.totalPages %}disabled{% endif %}">
+                    <a class="page-link" href="{{ path('app_menu_index', app.request.query.all|merge({page: pagination.currentPage + 1})) }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+{% endblock %}

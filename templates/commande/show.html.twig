@@ -1,0 +1,203 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande #{{ commande.numero }} - Brasil Burger{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-left">
+            <a href="{{ path('app_commande_index') }}" class="btn btn-back">← Retour</a>
+            <h1>Commande #{{ commande.numero }}</h1>
+            <span class="badge badge-{{ commande.etat }} badge-large">
+                {% if commande.etat == 'en_attente' %}⏳ En attente
+                {% elseif commande.etat == 'en_preparation' %}👨‍🍳 En préparation
+                {% elseif commande.etat == 'prete' %}✅ Prête
+                {% elseif commande.etat == 'en_livraison' %}🛵 En livraison
+                {% elseif commande.etat == 'livree' %}📦 Livrée
+                {% else %}❌ Annulée{% endif %}
+            </span>
+        </div>
+        <div class="header-actions">
+            {% if commande.etat not in ['livree', 'annulee'] %}
+                <a href="{{ path('app_commande_edit', {id: commande.id}) }}" class="btn btn-secondary">✏️ Modifier</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% include 'components/flash_messages.html.twig' %}
+
+    <div class="detail-container">
+        <div class="detail-grid">
+            <div class="detail-main">
+                <!-- Workflow -->
+                {% if commande.etat not in ['livree', 'annulee'] %}
+                <div class="detail-card workflow-card">
+                    <h3>🔄 Actions</h3>
+                    <div class="workflow-actions">
+                        {% if commande.etat == 'en_attente' %}
+                            <form action="{{ path('app_commande_change_etat', {id: commande.id}) }}" method="post">
+                                <input type="hidden" name="_token" value="{{ csrf_token('etat' ~ commande.id) }}">
+                                <input type="hidden" name="etat" value="en_preparation">
+                                <button type="submit" class="btn btn-primary btn-large">
+                                    👨‍🍳 Commencer la préparation
+                                </button>
+                            </form>
+                        {% elseif commande.etat == 'en_preparation' %}
+                            <form action="{{ path('app_commande_change_etat', {id: commande.id}) }}" method="post">
+                                <input type="hidden" name="_token" value="{{ csrf_token('etat' ~ commande.id) }}">
+                                <input type="hidden" name="etat" value="prete">
+                                <button type="submit" class="btn btn-success btn-large">
+                                    ✅ Marquer comme prête
+                                </button>
+                            </form>
+                        {% elseif commande.etat == 'prete' %}
+                            <a href="{{ path('app_commande_assign_livreur', {id: commande.id}) }}" class="btn btn-warning btn-large">
+                                🛵 Assigner un livreur
+                            </a>
+                        {% elseif commande.etat == 'en_livraison' %}
+                            <form action="{{ path('app_commande_change_etat', {id: commande.id}) }}" method="post">
+                                <input type="hidden" name="_token" value="{{ csrf_token('etat' ~ commande.id) }}">
+                                <input type="hidden" name="etat" value="livree">
+                                <button type="submit" class="btn btn-success btn-large">
+                                    📦 Confirmer la livraison
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        <form action="{{ path('app_commande_change_etat', {id: commande.id}) }}" method="post"
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('etat' ~ commande.id) }}">
+                            <input type="hidden" name="etat" value="annulee">
+                            <button type="submit" class="btn btn-danger">❌ Annuler la commande</button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Articles commandés -->
+                <div class="detail-card">
+                    <h3>🛒 Articles commandés</h3>
+                    <div class="order-items">
+                        {% for ligne in commande.ligneCommandes %}
+                            <div class="order-item">
+                                <div class="item-image">
+                                    {% if ligne.burger %}
+                                        {% if ligne.burger.image %}
+                                            <img src="{{ ligne.burger.image }}" alt="{{ ligne.burger.nom }}">
+                                        {% else %}
+                                            <span>🍔</span>
+                                        {% endif %}
+                                    {% elseif ligne.complement %}
+                                        {% if ligne.complement.image %}
+                                            <img src="{{ ligne.complement.image }}" alt="{{ ligne.complement.nom }}">
+                                        {% else %}
+                                            <span>🍟</span>
+                                        {% endif %}
+                                    {% elseif ligne.menu %}
+                                        {% if ligne.menu.image %}
+                                            <img src="{{ ligne.menu.image }}" alt="{{ ligne.menu.nom }}">
+                                        {% else %}
+                                            <span>📦</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <div class="item-details">
+                                    <span class="item-name">
+                                        {% if ligne.burger %}{{ ligne.burger.nom }}
+                                        {% elseif ligne.complement %}{{ ligne.complement.nom }}
+                                        {% elseif ligne.menu %}{{ ligne.menu.nom }}
+                                        {% endif %}
+                                    </span>
+                                    <span class="item-type">
+                                        {% if ligne.burger %}Burger
+                                        {% elseif ligne.complement %}{{ ligne.complement.type|capitalize }}
+                                        {% elseif ligne.menu %}Menu
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="item-qty">x{{ ligne.quantite }}</div>
+                                <div class="item-unit-price">{{ ligne.prixUnitaire|number_format(0, ',', ' ') }} XOF</div>
+                                <div class="item-subtotal">{{ ligne.sousTotal|number_format(0, ',', ' ') }} XOF</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <span>Sous-total</span>
+                            <span>{{ (commande.montantTotal - commande.fraisLivraison)|number_format(0, ',', ' ') }} XOF</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Frais de livraison</span>
+                            <span>{{ commande.fraisLivraison|number_format(0, ',', ' ') }} XOF</span>
+                        </div>
+                        <div class="summary-row summary-total">
+                            <span>Total</span>
+                            <span>{{ commande.montantTotal|number_format(0, ',', ' ') }} XOF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                {% if commande.notes %}
+                <div class="detail-card">
+                    <h3>📝 Notes</h3>
+                    <p class="notes-content">{{ commande.notes }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="detail-sidebar">
+                <!-- Client -->
+                <div class="detail-card">
+                    <h3>👤 Client</h3>
+                    <dl class="info-list">
+                        <dt>Nom</dt>
+                        <dd><strong>{{ commande.clientNom }}</strong></dd>
+                        <dt>Téléphone</dt>
+                        <dd>
+                            <a href="tel:{{ commande.clientTelephone }}">{{ commande.clientTelephone }}</a>
+                        </dd>
+                        <dt>Adresse</dt>
+                        <dd>{{ commande.adresseLivraison }}</dd>
+                    </dl>
+                </div>
+
+                <!-- Livraison -->
+                <div class="detail-card">
+                    <h3>📍 Livraison</h3>
+                    <dl class="info-list">
+                        <dt>Zone</dt>
+                        <dd>{{ commande.zone ? commande.zone.nom : 'Non définie' }}</dd>
+                        <dt>Frais</dt>
+                        <dd>{{ commande.fraisLivraison|number_format(0, ',', ' ') }} XOF</dd>
+                        {% if commande.livreur %}
+                            <dt>Livreur</dt>
+                            <dd>
+                                <div class="livreur-info-mini">
+                                    {% if commande.livreur.photo %}
+                                        <img src="{{ commande.livreur.photo }}" alt="{{ commande.livreur.prenom }}">
+                                    {% endif %}
+                                    <span>{{ commande.livreur.prenom }} {{ commande.livreur.nom }}</span>
+                                </div>
+                                <a href="tel:{{ commande.livreur.telephone }}">{{ commande.livreur.telephone }}</a>
+                            </dd>
+                        {% endif %}
+                    </dl>
+                </div>
+
+                <!-- Historique -->
+                <div class="detail-card">
+                    <h3>📅 Historique</h3>
+                    <dl class="info-list">
+                        <dt>Créée le</dt>
+                        <dd>{{ commande.createdAt|date('d/m/Y à H:i') }}</dd>
+                        <dt>Modifiée le</dt>
+                        <dd>{{ commande.updatedAt|date('d/m/Y à H:i') }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

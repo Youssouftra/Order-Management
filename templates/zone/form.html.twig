@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ zone.id ? 'Modifier' : 'Nouvelle' }} zone - Brasil Burger{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-left">
+            <a href="{{ path('app_zone_index') }}" class="btn btn-back">← Retour</a>
+            <h1>{{ zone.id ? 'Modifier' : 'Nouvelle' }} zone</h1>
+        </div>
+    </div>
+
+    {% include 'components/flash_messages.html.twig' %}
+
+    <div class="form-container form-narrow">
+        {{ form_start(form, {'attr': {'class': 'main-form'}}) }}
+        
+        <div class="form-card">
+            <h3>Informations de la zone</h3>
+            
+            <div class="form-group">
+                {{ form_label(form.nom) }}
+                {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom de la zone'}}) }}
+                {{ form_errors(form.nom) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Description de la zone...'}}) }}
+                {{ form_errors(form.description) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.fraisLivraison) }}
+                {{ form_widget(form.fraisLivraison, {'attr': {'class': 'form-control', 'placeholder': '0'}}) }}
+                {{ form_errors(form.fraisLivraison) }}
+            </div>
+
+            <div class="form-group">
+                <label class="switch-label">
+                    {{ form_widget(form.isActive, {'attr': {'class': 'switch-input'}}) }}
+                    <span class="switch-text">Zone active</span>
+                </label>
+                {{ form_errors(form.isActive) }}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ path('app_zone_index') }}" class="btn btn-outline">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                {{ zone.id ? 'Enregistrer les modifications' : 'Créer la zone' }}
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

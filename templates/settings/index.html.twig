@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres{% endblock %}
+{% block page_title %}Paramètres{% endblock %}
+{% block page_subtitle %}Configuration de l'application{% endblock %}
+
+{% block body %}
+<div class="content-area">
+    <form action="{{ path('app_settings_save') }}" method="post">
+        <input type="hidden" name="_token" value="{{ csrf_token('settings_save') }}">
+        
+        <!-- Restaurant Information -->
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <div class="settings-icon settings-icon-orange">
+                    <i class="bi bi-shop"></i>
+                </div>
+                <div class="settings-title">
+                    <h3>Informations du restaurant</h3>
+                    <p>Coordonnées et informations générales</p>
+                </div>
+            </div>
+            <div class="settings-card-body">
+                <div class="settings-form-row">
+                    <div class="form-group">
+                        <label class="form-label">Nom du restaurant</label>
+                        <input type="text" name="restaurant_nom" class="form-control" value="{{ settings.restaurant.nom }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Téléphone</label>
+                        <input type="tel" name="restaurant_telephone" class="form-control" value="{{ settings.restaurant.telephone }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Adresse</label>
+                    <input type="text" name="restaurant_adresse" class="form-control" value="{{ settings.restaurant.adresse }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="restaurant_email" class="form-control" value="{{ settings.restaurant.email }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <div class="settings-icon settings-icon-yellow">
+                    <i class="bi bi-bell"></i>
+                </div>
+                <div class="settings-title">
+                    <h3>Notifications</h3>
+                    <p>Gérer les alertes et notifications</p>
+                </div>
+            </div>
+            <div class="settings-card-body">
+                <div class="settings-toggle-item">
+                    <div class="toggle-info">
+                        <h4>Nouvelles commandes</h4>
+                        <p>Recevoir une notification pour chaque nouvelle commande</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="notif_nouvelles_commandes" {{ settings.notifications.nouvelles_commandes ? 'checked' : '' }}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-toggle-item">
+                    <div class="toggle-info">
+                        <h4>Commandes annulées</h4>
+                        <p>Alerte en cas d'annulation de commande</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="notif_commandes_annulees" {{ settings.notifications.commandes_annulees ? 'checked' : '' }}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-toggle-item">
+                    <div class="toggle-info">
+                        <h4>Rapports quotidiens</h4>
+                        <p>Recevoir un résumé des ventes chaque jour</p>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="notif_rapports_quotidiens" {{ settings.notifications.rapports_quotidiens ? 'checked' : '' }}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <div class="settings-icon settings-icon-green">
+                    <i class="bi bi-credit-card"></i>
+                </div>
+                <div class="settings-title">
+                    <h3>Paiement</h3>
+                    <p>Configuration des méthodes de paiement</p>
+                </div>
+            </div>
+            <div class="settings-card-body">
+                <div class="settings-toggle-item">
+                    <div class="toggle-info toggle-with-icon">
+                        <div class="payment-icon payment-wave">W</div>
+                        <div>
+                            <h4>Wave</h4>
+                            <p>Paiement mobile</p>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="paiement_wave" {{ settings.paiement.wave ? 'checked' : '' }}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="settings-toggle-item">
+                    <div class="toggle-info toggle-with-icon">
+                        <div class="payment-icon payment-om">OM</div>
+                        <div>
+                            <h4>Orange Money</h4>
+                            <p>Paiement mobile</p>
+                        </div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="paiement_orange_money" {{ settings.paiement.orange_money ? 'checked' : '' }}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Button -->
+        <div class="settings-save">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-check-circle"></i>
+                Enregistrer les modifications
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

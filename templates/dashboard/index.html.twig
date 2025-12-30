@@ -1,0 +1,265 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Aujourd'hui, {{ "now"|date("d/m/Y") }}{% endblock %}
+
+{% block body %}
+<div class="dashboard">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-warning">
+            <div class="stat-icon"><i class="bi bi-clock-fill"></i></div>
+            <div class="stat-content">
+                <span class="stat-label">Commandes en cours</span>
+                <span class="stat-value">{{ commandesEnCours|default(0) }}</span>
+            </div>
+        </div>
+        <div class="stat-card stat-success">
+            <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
+            <div class="stat-content">
+                <span class="stat-label">Commandes validées</span>
+                <span class="stat-value">{{ commandesLivrees|default(0) }}</span>
+            </div>
+        </div>
+        <div class="stat-card stat-danger">
+            <div class="stat-icon"><i class="bi bi-x-circle-fill"></i></div>
+            <div class="stat-content">
+                <span class="stat-label">Commandes annulées</span>
+                <span class="stat-value">{{ commandesAnnulees|default(0) }}</span>
+            </div>
+        </div>
+        <div class="stat-card stat-primary">
+            <div class="stat-icon"><i class="bi bi-currency-dollar"></i></div>
+            <div class="stat-content">
+                <span class="stat-label">Recettes du jour</span>
+                <span class="stat-value">{{ recetteJournaliere|number_format(0, ',', ' ') }} F</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="dashboard-grid">
+        <!-- Orders Evolution Chart -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div>
+                    <h3>Évolution des commandes</h3>
+                    <span class="subtitle">Nombre de commandes par heure</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="ordersChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Burgers -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <div>
+                    <h3>Burgers les plus vendus</h3>
+                    <span class="subtitle">Top 5 des ventes du jour</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="top-burgers-list">
+                    {% if topBurgers|default([])|length > 0 %}
+                        {% set maxVentes = topBurgers|first.totalVentes|default(1) %}
+                        {% for item in topBurgers %}
+                            <div class="top-burger-item">
+                                <span class="name">{{ item.nom }}</span>
+                                <div class="bar-container">
+                                    <div class="bar" style="width: {{ (item.totalVentes / maxVentes * 100)|round }}%;">
+                                        {{ item.totalVentes }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="top-burger-item">
+                            <span class="name">Classic Brasil</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 100%;">28</div>
+                            </div>
+                        </div>
+                        <div class="top-burger-item">
+                            <span class="name">Double Cheese</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 75%;">21</div>
+                            </div>
+                        </div>
+                        <div class="top-burger-item">
+                            <span class="name">BBQ Bacon</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 60%;">17</div>
+                            </div>
+                        </div>
+                        <div class="top-burger-item">
+                            <span class="name">Spicy Chicken</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 35%;">10</div>
+                            </div>
+                        </div>
+                        <div class="top-burger-item">
+                            <span class="name">Veggie Deluxe</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 20%;">6</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders -->
+    <div class="dashboard-card" style="margin-top: 25px;">
+        <div class="card-header">
+            <div>
+                <h3>Commandes récentes</h3>
+                <span class="subtitle">Dernières commandes du jour</span>
+            </div>
+            <a href="{{ path('app_commande_index') }}" class="btn btn-outline btn-sm">Voir tout ›</a>
+        </div>
+        <div class="card-body">
+            <div class="recent-orders-list">
+                {% if commandesRecentes|default([])|length > 0 %}
+                    {% for commande in commandesRecentes %}
+                        <div class="order-item">
+                            <div class="order-info">
+                                <div>
+                                    <span class="order-number">{{ commande.numero }}</span>
+                                    <span class="badge badge-status-{{ commande.etat }}">{{ commande.etat|replace({'_': ' '})|capitalize }}</span>
+                                </div>
+                                <div class="order-client">{{ commande.clientNom }}</div>
+                                <div class="order-meta">
+                                    <span><i class="bi bi-telephone"></i> {{ commande.clientTelephone|default('+221 77 123 45 67') }}</span>
+                                    {% if commande.zone %}
+                                        <span><i class="bi bi-geo-alt"></i> {{ commande.zone.nom }}</span>
+                                    {% endif %}
+                                    <span><i class="bi bi-clock"></i> {{ commande.createdAt|date('H:i') }}</span>
+                                </div>
+                            </div>
+                            <div class="order-right">
+                                <div class="order-total">{{ commande.montantTotal|number_format(0, ' ', ' ') }} F</div>
+                                <div class="order-articles">{{ commande.ligneCommandes|length }} article(s)</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="order-item">
+                        <div class="order-info">
+                            <div>
+                                <span class="order-number">BB-2024-0001</span>
+                                <span class="badge badge-status-en_preparation">En préparation</span>
+                            </div>
+                            <div class="order-client">Amadou Diallo</div>
+                            <div class="order-meta">
+                                <span><i class="bi bi-telephone"></i> +221 77 123 45 67</span>
+                                <span><i class="bi bi-geo-alt"></i> Centre-ville</span>
+                                <span><i class="bi bi-clock"></i> 14:30</span>
+                            </div>
+                        </div>
+                        <div class="order-right">
+                            <div class="order-total">8 300 F</div>
+                            <div class="order-articles">2 article(s)</div>
+                        </div>
+                    </div>
+                    <div class="order-item">
+                        <div class="order-info">
+                            <div>
+                                <span class="order-number">BB-2024-0002</span>
+                                <span class="badge badge-status-confirmee">Confirmée</span>
+                            </div>
+                            <div class="order-client">Fatou Ndiaye</div>
+                            <div class="order-meta">
+                                <span><i class="bi bi-telephone"></i> +221 78 234 56 78</span>
+                                <span><i class="bi bi-clock"></i> 11:35</span>
+                            </div>
+                        </div>
+                        <div class="order-right">
+                            <div class="order-total">4 300 F</div>
+                            <div class="order-articles">1 article(s)</div>
+                        </div>
+                    </div>
+                    <div class="order-item">
+                        <div class="order-info">
+                            <div>
+                                <span class="order-number">BB-2024-0003</span>
+                                <span class="badge badge-status-prete">Prête</span>
+                            </div>
+                            <div class="order-client">Moussa Sow</div>
+                            <div class="order-meta">
+                                <span><i class="bi bi-telephone"></i> +221 76 345 67 89</span>
+                                <span><i class="bi bi-clock"></i> 11:20</span>
+                            </div>
+                        </div>
+                        <div class="order-right">
+                            <div class="order-total">5 800 F</div>
+                            <div class="order-articles">1 article(s)</div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('ordersChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+                datasets: [{
+                    label: 'Commandes',
+                    data: [2, 5, 18, 22, 15, 12, 8, 3],
+                    borderColor: '#f97316',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#f97316',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        },
+                        ticks: {
+                            color: '#6b6b6b'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        },
+                        ticks: {
+                            color: '#6b6b6b'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

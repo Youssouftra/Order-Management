@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ menu.id ? 'Modifier' : 'Nouveau' }} menu - Brasil Burger{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-left">
+            <a href="{{ path('app_menu_index') }}" class="btn btn-back">← Retour</a>
+            <h1>{{ menu.id ? 'Modifier' : 'Nouveau' }} menu</h1>
+        </div>
+    </div>
+
+    {% include 'components/flash_messages.html.twig' %}
+
+    <div class="form-container">
+        {{ form_start(form, {'attr': {'class': 'main-form', 'enctype': 'multipart/form-data'}}) }}
+        
+        <div class="form-grid">
+            <div class="form-main">
+                <div class="form-card">
+                    <h3>Informations générales</h3>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.nom) }}
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Nom du menu'}}) }}
+                        {{ form_errors(form.nom) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.description) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Description du menu...'}}) }}
+                        {{ form_errors(form.description) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.prix) }}
+                        {{ form_widget(form.prix, {'attr': {'class': 'form-control', 'placeholder': '0'}}) }}
+                        {{ form_errors(form.prix) }}
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h3>Composition du menu</h3>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.burgers) }}
+                        {{ form_widget(form.burgers, {'attr': {'class': 'form-control form-select-multiple', 'size': 5}}) }}
+                        {{ form_errors(form.burgers) }}
+                        <p class="form-hint">Maintenez Ctrl pour sélectionner plusieurs burgers</p>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.complements) }}
+                        {{ form_widget(form.complements, {'attr': {'class': 'form-control form-select-multiple', 'size': 5}}) }}
+                        {{ form_errors(form.complements) }}
+                        <p class="form-hint">Maintenez Ctrl pour sélectionner plusieurs compléments</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-sidebar">
+                <div class="form-card">
+                    <h3>Image</h3>
+                    
+                    {% if menu.image %}
+                        <div class="current-image">
+                            <img src="{{ menu.image }}" alt="{{ menu.nom }}">
+                            <p class="image-hint">Image actuelle</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        {{ form_label(form.imageFile) }}
+                        {{ form_widget(form.imageFile, {'attr': {'class': 'form-control-file', 'accept': 'image/*'}}) }}
+                        {{ form_errors(form.imageFile) }}
+                        <p class="form-hint">Formats acceptés: JPG, PNG, GIF (max 2 Mo)</p>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h3>Statut</h3>
+                    
+                    <div class="form-group">
+                        <label class="switch-label">
+                            {{ form_widget(form.isActive, {'attr': {'class': 'switch-input'}}) }}
+                            <span class="switch-text">Menu actif</span>
+                        </label>
+                        {{ form_errors(form.isActive) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ path('app_menu_index') }}" class="btn btn-outline">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                {{ menu.id ? 'Enregistrer les modifications' : 'Créer le menu' }}
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

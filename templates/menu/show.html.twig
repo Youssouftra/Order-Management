@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ menu.nom }} - Brasil Burger{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-left">
+            <a href="{{ path('app_menu_index') }}" class="btn btn-back">← Retour</a>
+            <h1>{{ menu.nom }}</h1>
+            <span class="badge {{ menu.isActive ? 'badge-success' : 'badge-danger' }}">
+                {{ menu.isActive ? 'Actif' : 'Inactif' }}
+            </span>
+        </div>
+        <div class="header-actions">
+            <a href="{{ path('app_menu_edit', {id: menu.id}) }}" class="btn btn-secondary">✏️ Modifier</a>
+        </div>
+    </div>
+
+    <div class="detail-container">
+        <div class="detail-grid">
+            <div class="detail-main">
+                <div class="detail-card">
+                    <div class="menu-header">
+                        {% if menu.image %}
+                            <img src="{{ menu.image }}" alt="{{ menu.nom }}" class="menu-image-large">
+                        {% else %}
+                            <div class="no-image-large">📦</div>
+                        {% endif %}
+                        <div class="menu-info">
+                            <h2>{{ menu.nom }}</h2>
+                            <p class="menu-description">{{ menu.description }}</p>
+                            <div class="menu-price-large">{{ menu.prix|number_format(0, ',', ' ') }} XOF</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Burgers du menu -->
+                <div class="detail-card">
+                    <h3>🍔 Burgers inclus ({{ menu.burgers|length }})</h3>
+                    {% if menu.burgers|length > 0 %}
+                        <div class="items-list">
+                            {% for burger in menu.burgers %}
+                                <div class="item-row">
+                                    <div class="item-image">
+                                        {% if burger.image %}
+                                            <img src="{{ burger.image }}" alt="{{ burger.nom }}">
+                                        {% else %}
+                                            <span>🍔</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="item-info">
+                                        <span class="item-name">{{ burger.nom }}</span>
+                                        <span class="item-price">{{ burger.prix|number_format(0, ',', ' ') }} XOF</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty-message">Aucun burger dans ce menu</p>
+                    {% endif %}
+                </div>
+
+                <!-- Compléments du menu -->
+                <div class="detail-card">
+                    <h3>🍟 Compléments inclus ({{ menu.complements|length }})</h3>
+                    {% if menu.complements|length > 0 %}
+                        <div class="items-list">
+                            {% for complement in menu.complements %}
+                                <div class="item-row">
+                                    <div class="item-image">
+                                        {% if complement.image %}
+                                            <img src="{{ complement.image }}" alt="{{ complement.nom }}">
+                                        {% else %}
+                                            <span>
+                                                {% if complement.type == 'boisson' %}🥤
+                                                {% elseif complement.type == 'frite' %}🍟
+                                                {% elseif complement.type == 'dessert' %}🍰
+                                                {% else %}🥫{% endif %}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="item-info">
+                                        <span class="item-name">{{ complement.nom }}</span>
+                                        <span class="item-type badge badge-type">{{ complement.type|capitalize }}</span>
+                                        <span class="item-price">{{ complement.prix|number_format(0, ',', ' ') }} XOF</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="empty-message">Aucun complément dans ce menu</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-sidebar">
+                <div class="detail-card">
+                    <h3>Informations</h3>
+                    <dl class="info-list">
+                        <dt>Créé le</dt>
+                        <dd>{{ menu.createdAt|date('d/m/Y à H:i') }}</dd>
+                        <dt>Modifié le</dt>
+                        <dd>{{ menu.updatedAt|date('d/m/Y à H:i') }}</dd>
+                        <dt>Statut</dt>
+                        <dd>
+                            <span class="badge {{ menu.isActive ? 'badge-success' : 'badge-danger' }}">
+                                {{ menu.isActive ? 'Actif' : 'Inactif' }}
+                            </span>
+                        </dd>
+                    </dl>
+                </div>
+
+                <div class="detail-card">
+                    <h3>Économie</h3>
+                    {% set totalSepare = 0 %}
+                    {% for burger in menu.burgers %}
+                        {% set totalSepare = totalSepare + burger.prix %}
+                    {% endfor %}
+                    {% for complement in menu.complements %}
+                        {% set totalSepare = totalSepare + complement.prix %}
+                    {% endfor %}
+                    {% set economie = totalSepare - menu.prix %}
+                    
+                    <dl class="info-list">
+                        <dt>Prix séparé</dt>
+                        <dd>{{ totalSepare|number_format(0, ',', ' ') }} XOF</dd>
+                        <dt>Prix menu</dt>
+                        <dd class="text-primary">{{ menu.prix|number_format(0, ',', ' ') }} XOF</dd>
+                        <dt>Économie</dt>
+                        <dd class="text-success">{{ economie|number_format(0, ',', ' ') }} XOF</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Livreurs{% endblock %}
+{% block page_title %}Livreurs{% endblock %}
+{% block page_subtitle %}{{ livreurs|length }} livreur(s){% endblock %}
+
+{% block body %}
+<div class="livreurs-page">
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <form method="get" action="{{ path('app_livreur_index') }}" style="width: 100%;">
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher un livreur..." value="{{ app.request.query.get('search') }}">
+                </form>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#livreurModal">
+                <i class="bi bi-plus-lg"></i> Ajouter
+            </button>
+        </div>
+    </div>
+
+    <!-- Drivers Grid -->
+    <div class="drivers-grid">
+        {% for livreur in livreurs %}
+        <div class="driver-card {{ not livreur.isActive ? 'inactive' : '' }}">
+            <div class="driver-header">
+                <div class="driver-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <div class="driver-info">
+                    <h3 class="driver-name">{{ livreur.prenom }} {{ livreur.nom }}</h3>
+                    <span class="driver-phone">
+                        <i class="bi bi-telephone"></i>
+                        {{ livreur.telephone }}
+                    </span>
+                </div>
+                <div class="driver-toggle">
+                    <form action="{{ path('app_livreur_toggle', {id: livreur.id}) }}" method="post">
+                        <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ livreur.id) }}">
+                        <button type="submit" class="btn-icon-action" title="{{ livreur.isActive ? 'Désactiver' : 'Activer' }}">
+                            <i class="bi bi-power"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="driver-body">
+                <div class="driver-status">
+                    {% set activeDeliveries = 0 %}
+                    {% for cmd in livreur.commandes %}
+                        {% if cmd.etat == 'en_livraison' %}
+                            {% set activeDeliveries = activeDeliveries + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if not livreur.isActive %}
+                        <span class="badge badge-driver-inactive">Indisponible</span>
+                    {% elseif activeDeliveries > 0 %}
+                        <span class="badge badge-driver-busy">En livraison</span>
+                    {% else %}
+                        <span class="badge badge-driver-available">Disponible</span>
+                    {% endif %}
+                </div>
+                {% if activeDeliveries > 0 %}
+                <div class="driver-deliveries">
+                    <i class="bi bi-bicycle"></i>
+                    <span>{{ activeDeliveries }} en cours</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Edit Livreur Modal -->
+        <div class="modal fade" id="editLivreurModal{{ livreur.id }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Modifier le livreur</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form action="{{ path('app_livreur_edit', {id: livreur.id}) }}" method="post">
+                        <div class="modal-body">
+                            <input type="hidden" name="_token" value="{{ csrf_token('livreur_edit' ~ livreur.id) }}">
+                            <div class="mb-3">
+                                <label class="form-label">Prénom</label>
+                                <input type="text" name="prenom" class="form-control" value="{{ livreur.prenom }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Nom</label>
+                                <input type="text" name="nom" class="form-control" value="{{ livreur.nom }}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Téléphone</label>
+                                <input type="tel" name="telephone" class="form-control" value="{{ livreur.telephone }}" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-bicycle"></i>
+            <h3>Aucun livreur</h3>
+            <p>Commencez par ajouter votre premier livreur</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Livreur Modal -->
+<div class="modal fade" id="livreurModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un livreur</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ path('app_livreur_new') }}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="_token" value="{{ csrf_token('livreur_new') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Prénom</label>
+                        <input type="text" name="prenom" class="form-control" placeholder="Prénom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nom</label>
+                        <input type="text" name="nom" class="form-control" placeholder="Nom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Téléphone</label>
+                        <input type="tel" name="telephone" class="form-control" placeholder="+221 77 123 45 67" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

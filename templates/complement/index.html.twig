@@ -1,0 +1,165 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Compléments{% endblock %}
+
+{% block page_title %}Compléments{% endblock %}
+{% block page_subtitle %}{{ pagination.totalItems|default(0) }} complément(s) actif(s){% endblock %}
+
+{% block body %}
+<div class="complements-page">
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <form method="get" action="{{ path('app_complement_index') }}" style="width: 100%;">
+                    <input type="hidden" name="type" value="{{ app.request.query.get('type') }}">
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher un complément..." value="{{ app.request.query.get('search') }}">
+                </form>
+            </div>
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <a href="{{ path('app_complement_index', {search: app.request.query.get('search')}) }}" 
+                   class="filter-tab {% if not app.request.query.get('type') %}active{% endif %}">Tous</a>
+                <a href="{{ path('app_complement_index', {type: 'boisson', search: app.request.query.get('search')}) }}" 
+                   class="filter-tab {% if app.request.query.get('type') == 'boisson' %}active{% endif %}">Boissons</a>
+                <a href="{{ path('app_complement_index', {type: 'frite', search: app.request.query.get('search')}) }}" 
+                   class="filter-tab {% if app.request.query.get('type') == 'frite' %}active{% endif %}">Frites</a>
+                <a href="{{ path('app_complement_index', {type: 'sauce', search: app.request.query.get('search')}) }}" 
+                   class="filter-tab {% if app.request.query.get('type') == 'sauce' %}active{% endif %}">Sauces</a>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <a href="{{ path('app_complement_index', {status: app.request.query.get('status') == '0' ? '' : '0'}) }}" 
+               class="btn btn-outline {% if app.request.query.get('status') == '0' %}active{% endif %}">
+                <i class="bi bi-archive"></i> Voir archivés
+            </a>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#complementModal">
+                <i class="bi bi-plus-lg"></i> Ajouter
+            </button>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="product-grid">
+        {% for complement in complements %}
+            <div class="product-card">
+                {% if complement.image %}
+                    <img src="{{ complement.image }}" alt="{{ complement.nom }}" class="product-image">
+                {% else %}
+                    <div class="product-image-placeholder">
+                        {% if complement.type == 'boisson' %}
+                            <i class="bi bi-cup-straw"></i>
+                        {% elseif complement.type == 'frite' %}
+                            <i class="bi bi-basket2"></i>
+                        {% else %}
+                            <i class="bi bi-droplet"></i>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <div class="product-body">
+                    <div class="product-header">
+                        <h3 class="product-name">{{ complement.nom }}</h3>
+                        <span class="product-price">{{ complement.prix|number_format(0, ',', ' ') }} F</span>
+                    </div>
+                    <p class="product-type">{{ complement.type|capitalize }}</p>
+                </div>
+                <div class="product-footer">
+                    <button type="button" class="btn btn-icon btn-outline" onclick="editComplement({{ complement.id }})" title="Modifier">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <form action="{{ path('app_complement_toggle', {id: complement.id}) }}" method="post" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('toggle' ~ complement.id) }}">
+                        <button type="submit" class="btn btn-icon btn-outline" title="{{ complement.isActive ? 'Désactiver' : 'Activer' }}">
+                            <i class="bi bi-{{ complement.isActive ? 'eye-slash' : 'eye' }}"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="bi bi-cup-straw"></i>
+                <h4>Aucun complément trouvé</h4>
+                <p>Commencez par ajouter votre premier complément</p>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#complementModal">
+                    <i class="bi bi-plus-lg"></i> Ajouter un complément
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.totalPages|default(1) > 1 %}
+        <nav>
+            <ul class="pagination">
+                <li class="page-item {% if pagination.currentPage == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{{ path('app_complement_index', {page: pagination.currentPage - 1, search: app.request.query.get('search'), type: app.request.query.get('type')}) }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                {% for i in 1..pagination.totalPages %}
+                    <li class="page-item {% if pagination.currentPage == i %}active{% endif %}">
+                        <a class="page-link" href="{{ path('app_complement_index', {page: i, search: app.request.query.get('search'), type: app.request.query.get('type')}) }}">{{ i }}</a>
+                    </li>
+                {% endfor %}
+                <li class="page-item {% if pagination.currentPage == pagination.totalPages %}disabled{% endif %}">
+                    <a class="page-link" href="{{ path('app_complement_index', {page: pagination.currentPage + 1, search: app.request.query.get('search'), type: app.request.query.get('type')}) }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="complementModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un complément</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ path('app_complement_new') }}" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nom</label>
+                        <input type="text" class="form-control" name="complement[nom]" placeholder="Nom du produit" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" name="complement[type]" required>
+                            <option value="">Sélectionner un type</option>
+                            <option value="boisson">Boisson</option>
+                            <option value="frite">Frites</option>
+                            <option value="sauce">Sauce</option>
+                            <option value="dessert">Dessert</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Prix (FCFA)</label>
+                        <input type="number" class="form-control" name="complement[prix]" placeholder="0" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">URL de l'image</label>
+                        <input type="url" class="form-control" name="complement[image]" placeholder="https://...">
+                    </div>
+                    <input type="hidden" name="complement[_token]" value="{{ csrf_token('complement') }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function editComplement(id) {
+    window.location.href = '/complements/' + id + '/edit';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,204 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ commande.id ? 'Modifier' : 'Nouvelle' }} commande - Brasil Burger{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-left">
+            <a href="{{ path('app_commande_index') }}" class="btn btn-back">← Retour</a>
+            <h1>{{ commande.id ? 'Modifier la commande #' ~ commande.numero : 'Nouvelle commande' }}</h1>
+        </div>
+    </div>
+
+    {% include 'components/flash_messages.html.twig' %}
+
+    <div class="form-container">
+        {{ form_start(form, {'attr': {'class': 'main-form'}}) }}
+        
+        <div class="form-grid">
+            <div class="form-main">
+                <div class="form-card">
+                    <h3>👤 Informations client</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(form.clientNom) }}
+                            {{ form_widget(form.clientNom, {'attr': {'class': 'form-control', 'placeholder': 'Nom du client'}}) }}
+                            {{ form_errors(form.clientNom) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(form.clientTelephone) }}
+                            {{ form_widget(form.clientTelephone, {'attr': {'class': 'form-control', 'placeholder': '+221 XX XXX XX XX'}}) }}
+                            {{ form_errors(form.clientTelephone) }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.adresseLivraison) }}
+                        {{ form_widget(form.adresseLivraison, {'attr': {'class': 'form-control', 'rows': 2, 'placeholder': 'Adresse complète de livraison'}}) }}
+                        {{ form_errors(form.adresseLivraison) }}
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h3>📍 Zone de livraison</h3>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.zone) }}
+                        {{ form_widget(form.zone, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(form.zone) }}
+                        <p class="form-hint">Les frais de livraison seront calculés automatiquement</p>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h3>📝 Notes</h3>
+                    
+                    <div class="form-group">
+                        {{ form_widget(form.notes, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Instructions spéciales, allergies, etc.'}}) }}
+                        {{ form_errors(form.notes) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-sidebar">
+                <div class="form-card">
+                    <h3>🍔 Burgers</h3>
+                    <div id="burgers-container">
+                        {% for burger in burgers %}
+                            <div class="product-selector">
+                                <label>
+                                    <input type="checkbox" name="burgers[{{ burger.id }}][selected]" value="1"
+                                           class="product-checkbox" data-price="{{ burger.prix }}">
+                                    <span class="product-name">{{ burger.nom }}</span>
+                                    <span class="product-price">{{ burger.prix|number_format(0, ',', ' ') }} XOF</span>
+                                </label>
+                                <input type="number" name="burgers[{{ burger.id }}][qty]" value="1" min="1" max="10"
+                                       class="qty-input" disabled>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h3>🍟 Compléments</h3>
+                    <div id="complements-container">
+                        {% for complement in complements %}
+                            <div class="product-selector">
+                                <label>
+                                    <input type="checkbox" name="complements[{{ complement.id }}][selected]" value="1"
+                                           class="product-checkbox" data-price="{{ complement.prix }}">
+                                    <span class="product-name">{{ complement.nom }}</span>
+                                    <span class="product-type">{{ complement.type }}</span>
+                                    <span class="product-price">{{ complement.prix|number_format(0, ',', ' ') }} XOF</span>
+                                </label>
+                                <input type="number" name="complements[{{ complement.id }}][qty]" value="1" min="1" max="10"
+                                       class="qty-input" disabled>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <h3>📦 Menus</h3>
+                    <div id="menus-container">
+                        {% for menu in menus %}
+                            <div class="product-selector">
+                                <label>
+                                    <input type="checkbox" name="menus[{{ menu.id }}][selected]" value="1"
+                                           class="product-checkbox" data-price="{{ menu.prix }}">
+                                    <span class="product-name">{{ menu.nom }}</span>
+                                    <span class="product-price">{{ menu.prix|number_format(0, ',', ' ') }} XOF</span>
+                                </label>
+                                <input type="number" name="menus[{{ menu.id }}][qty]" value="1" min="1" max="10"
+                                       class="qty-input" disabled>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="form-card total-card">
+                    <h3>💰 Total</h3>
+                    <div class="total-breakdown">
+                        <div class="total-row">
+                            <span>Sous-total</span>
+                            <span id="subtotal">0 XOF</span>
+                        </div>
+                        <div class="total-row">
+                            <span>Livraison</span>
+                            <span id="delivery-fee">0 XOF</span>
+                        </div>
+                        <div class="total-row total-final">
+                            <span>Total</span>
+                            <span id="total">0 XOF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ path('app_commande_index') }}" class="btn btn-outline">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                {{ commande.id ? 'Enregistrer les modifications' : 'Créer la commande' }}
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    const zoneSelect = document.querySelector('[name="commande[zone]"]');
+    
+    // Zone prices (from PHP)
+    const zonePrices = {
+        {% for zone in zones %}
+        '{{ zone.id }}': {{ zone.fraisLivraison }},
+        {% endfor %}
+    };
+    
+    function updateTotal() {
+        let subtotal = 0;
+        
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                const price = parseInt(cb.dataset.price);
+                const qtyInput = cb.closest('.product-selector').querySelector('.qty-input');
+                const qty = parseInt(qtyInput.value) || 1;
+                subtotal += price * qty;
+            }
+        });
+        
+        const zoneId = zoneSelect ? zoneSelect.value : '';
+        const deliveryFee = zonePrices[zoneId] || 0;
+        const total = subtotal + deliveryFee;
+        
+        document.getElementById('subtotal').textContent = subtotal.toLocaleString('fr-FR') + ' XOF';
+        document.getElementById('delivery-fee').textContent = deliveryFee.toLocaleString('fr-FR') + ' XOF';
+        document.getElementById('total').textContent = total.toLocaleString('fr-FR') + ' XOF';
+    }
+    
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const qtyInput = this.closest('.product-selector').querySelector('.qty-input');
+            qtyInput.disabled = !this.checked;
+            updateTotal();
+        });
+    });
+    
+    document.querySelectorAll('.qty-input').forEach(input => {
+        input.addEventListener('change', updateTotal);
+    });
+    
+    if (zoneSelect) {
+        zoneSelect.addEventListener('change', updateTotal);
+    }
+    
+    updateTotal();
+});
+</script>
+{% endblock %}

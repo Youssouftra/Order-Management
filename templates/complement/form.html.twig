@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ complement.id ? 'Modifier' : 'Nouveau' }} complément{% endblock %}
+
+{% block page_title %}{{ complement.id ? 'Modifier' : 'Nouveau' }} complément{% endblock %}
+{% block page_subtitle %}{% if complement.id %}Modification de {{ complement.nom }}{% else %}Ajouter un nouveau complément{% endif %}{% endblock %}
+
+{% block body %}
+<div class="form-page">
+    <div class="dashboard-card">
+        <div class="card-header">
+            <a href="{{ path('app_complement_index') }}" class="btn btn-outline">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </div>
+        <div class="card-body">
+            <form action="{{ complement.id ? path('app_complement_edit', {id: complement.id}) : path('app_complement_new') }}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="complement[_token]" value="{{ csrf_token('complement' ~ (complement.id ?? '')) }}">
+                
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="form-label">Nom <span class="required">*</span></label>
+                        <input type="text" class="form-control" name="complement[nom]" value="{{ complement.nom ?? '' }}" placeholder="Nom du complément" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="form-label">Type <span class="required">*</span></label>
+                        <select class="form-select" name="complement[type]" required>
+                            <option value="">Sélectionner un type</option>
+                            <option value="boisson" {% if complement.type == 'boisson' %}selected{% endif %}>Boisson</option>
+                            <option value="frite" {% if complement.type == 'frite' %}selected{% endif %}>Frites</option>
+                            <option value="sauce" {% if complement.type == 'sauce' %}selected{% endif %}>Sauce</option>
+                            <option value="dessert" {% if complement.type == 'dessert' %}selected{% endif %}>Dessert</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="form-label">Prix (FCFA) <span class="required">*</span></label>
+                        <input type="number" class="form-control" name="complement[prix]" value="{{ complement.prix ?? '' }}" placeholder="0" min="0" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="form-label">Statut</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" name="complement[isActive]" id="isActive" {% if complement.isActive ?? true %}checked{% endif %}>
+                            <label class="form-check-label" for="isActive">Complément actif</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">URL de l'image</label>
+                    <input type="url" class="form-control" name="complement[image]" value="{{ complement.image ?? '' }}" placeholder="https://...">
+                    <small class="form-text">Entrez l'URL d'une image ou laissez vide</small>
+                </div>
+
+                {% if complement.image %}
+                <div class="form-group">
+                    <label class="form-label">Image actuelle</label>
+                    <div class="image-preview">
+                        <img src="{{ complement.image }}" alt="{{ complement.nom }}" style="max-width: 200px; border-radius: 8px;">
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="form-actions">
+                    <a href="{{ path('app_complement_index') }}" class="btn btn-outline">Annuler</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg"></i> {{ complement.id ? 'Enregistrer' : 'Ajouter' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

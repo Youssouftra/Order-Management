@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Assigner un livreur - Commande #{{ commande.numero }}{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-left">
+            <a href="{{ path('app_commande_show', {id: commande.id}) }}" class="btn btn-back">← Retour</a>
+            <h1>Assigner un livreur</h1>
+        </div>
+    </div>
+
+    {% include 'components/flash_messages.html.twig' %}
+
+    <div class="assign-container">
+        <div class="assign-header">
+            <div class="commande-resume">
+                <h2>Commande #{{ commande.numero }}</h2>
+                <p><strong>Client:</strong> {{ commande.clientNom }}</p>
+                <p><strong>Adresse:</strong> {{ commande.adresseLivraison }}</p>
+                <p><strong>Zone:</strong> {{ commande.zone ? commande.zone.nom : 'Non définie' }}</p>
+                <p class="commande-total"><strong>Total:</strong> {{ commande.montantTotal|number_format(0, ',', ' ') }} XOF</p>
+            </div>
+        </div>
+
+        <h3>🛵 Livreurs disponibles</h3>
+        
+        {% if livreurs|length > 0 %}
+            <div class="livreurs-select-grid">
+                {% for livreur in livreurs %}
+                    <form action="{{ path('app_commande_do_assign_livreur', {id: commande.id}) }}" method="post" class="livreur-select-card">
+                        <input type="hidden" name="_token" value="{{ csrf_token('assign' ~ commande.id) }}">
+                        <input type="hidden" name="livreur_id" value="{{ livreur.id }}">
+                        
+                        <div class="livreur-select-avatar">
+                            {% if livreur.photo %}
+                                <img src="{{ livreur.photo }}" alt="{{ livreur.prenom }}">
+                            {% else %}
+                                <span class="avatar-placeholder">{{ livreur.prenom|first }}{{ livreur.nom|first }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="livreur-select-info">
+                            <h4>{{ livreur.prenom }} {{ livreur.nom }}</h4>
+                            <p>📞 {{ livreur.telephone }}</p>
+                            <p>📍 {{ livreur.zone ? livreur.zone.nom : 'Toutes zones' }}</p>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Assigner</button>
+                    </form>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">🛵</div>
+                <h3>Aucun livreur disponible</h3>
+                <p>Tous les livreurs sont actuellement occupés ou indisponibles</p>
+                <a href="{{ path('app_livreur_index') }}" class="btn btn-secondary">Gérer les livreurs</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

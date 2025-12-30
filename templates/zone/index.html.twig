@@ -1,0 +1,147 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Zones de livraison{% endblock %}
+
+{% block page_title %}Zones de livraison{% endblock %}
+{% block page_subtitle %}{{ zones|length }} zone(s) configurée(s){% endblock %}
+
+{% block body %}
+<div class="zones-page">
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <form method="get" action="{{ path('app_zone_index') }}" style="width: 100%;">
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher une zone..." value="{{ app.request.query.get('search') }}">
+                </form>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#zoneModal">
+                <i class="bi bi-plus-lg"></i> Ajouter
+            </button>
+        </div>
+    </div>
+
+    <!-- Zones Grid -->
+    <div class="zones-grid">
+        {% for zone in zones %}
+            <div class="zone-card">
+                <div class="zone-header">
+                    <div class="zone-icon">
+                        <i class="bi bi-geo-alt-fill"></i>
+                    </div>
+                    <div class="zone-title">
+                        <h3>{{ zone.nom }}</h3>
+                        <span class="zone-districts-count">{{ zone.districts|length }} quartier(s)</span>
+                    </div>
+                    <div class="zone-actions">
+                        <button type="button" class="btn btn-icon btn-outline" data-bs-toggle="modal" data-bs-target="#editZoneModal{{ zone.id }}" title="Modifier">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <form action="{{ path('app_zone_delete', {id: zone.id}) }}" method="post" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette zone ?')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ zone.id) }}">
+                            <button type="submit" class="btn btn-icon btn-outline btn-danger" title="Supprimer">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="zone-body">
+                    <div class="zone-fee">
+                        <span class="fee-label">Frais de livraison</span>
+                        <span class="fee-value">{{ zone.fraisLivraison|number_format(0, ',', ' ') }} F</span>
+                    </div>
+                </div>
+                <div class="zone-districts">
+                    {% if zone.districts|length > 0 %}
+                        {% for district in zone.districts %}
+                            <span class="district-tag">{{ district.nom }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="no-districts">Aucun quartier configuré</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Edit Zone Modal -->
+            <div class="modal fade" id="editZoneModal{{ zone.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Modifier la zone</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="{{ path('app_zone_edit', {id: zone.id}) }}" method="post">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Nom de la zone</label>
+                                    <input type="text" class="form-control" name="zone[nom]" value="{{ zone.nom }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Frais de livraison (FCFA)</label>
+                                    <input type="number" class="form-control" name="zone[fraisLivraison]" value="{{ zone.fraisLivraison }}" min="0" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Quartiers (séparés par des virgules)</label>
+                                    <textarea class="form-control" name="zone[quartiers]" rows="3">{% for district in zone.districts %}{{ district.nom }}{% if not loop.last %}, {% endif %}{% endfor %}</textarea>
+                                    <small class="form-text">Entrez les noms des quartiers séparés par des virgules</small>
+                                </div>
+                                <input type="hidden" name="zone[_token]" value="{{ csrf_token('zone' ~ zone.id) }}">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state" style="grid-column: 1 / -1;">
+                <i class="bi bi-geo-alt"></i>
+                <h4>Aucune zone configurée</h4>
+                <p>Commencez par ajouter votre première zone de livraison</p>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#zoneModal">
+                    <i class="bi bi-plus-lg"></i> Ajouter une zone
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Zone Modal -->
+<div class="modal fade" id="zoneModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter une zone</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ path('app_zone_new') }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nom de la zone</label>
+                        <input type="text" class="form-control" name="zone[nom]" placeholder="Ex: Dakar Plateau" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Frais de livraison (FCFA)</label>
+                        <input type="number" class="form-control" name="zone[fraisLivraison]" placeholder="0" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quartiers (séparés par des virgules)</label>
+                        <textarea class="form-control" name="zone[quartiers]" rows="3" placeholder="Quartier 1, Quartier 2, Quartier 3..."></textarea>
+                        <small class="form-text">Entrez les noms des quartiers séparés par des virgules</small>
+                    </div>
+                    <input type="hidden" name="zone[_token]" value="{{ csrf_token('zone') }}">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
