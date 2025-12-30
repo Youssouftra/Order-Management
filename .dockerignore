@@ -1,0 +1,9 @@
+.env
+.env.local
+.env.dev
+.git
+.gitignore
+var/cache/*
+var/log/*
+vendor/
+node_modules/
