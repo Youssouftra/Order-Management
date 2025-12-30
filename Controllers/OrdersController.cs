@@ -59,8 +59,8 @@ public class OrdersController : Controller
             return RedirectToAction("Index", "Cart");
         }
 
-        var commande = await _commandeService.CreateCommandeAsync(clientId.Value, cart, typeCommande, zoneId, adresseLivraison);
-        await _commandeService.CreatePaiementAsync(commande.Id, commande.Total, modePaiement);
+        var commande = await _commandeService.CreateCommandeAsync(clientId.Value, cart, typeCommande, zoneId, null);
+        await _commandeService.CreatePaiementAsync(commande.Id, commande.MontantTotal, modePaiement);
         _cartService.ClearCart();
 
         return RedirectToAction("Confirmation", new { id = commande.Id });
@@ -75,7 +75,7 @@ public class OrdersController : Controller
         }
 
         var commande = await _commandeService.GetCommandeByIdAsync(id);
-        if (commande == null || commande.IdClient != clientId)
+        if (commande == null || commande.ClientId != clientId)
         {
             return NotFound();
         }
@@ -105,7 +105,7 @@ public class OrdersController : Controller
         }
 
         var commande = await _commandeService.GetCommandeByIdAsync(id);
-        if (commande == null || commande.IdClient != clientId)
+        if (commande == null || commande.ClientId != clientId)
         {
             return NotFound();
         }
