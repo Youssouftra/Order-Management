@@ -24,12 +24,12 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Clear and warmup cache
-RUN APP_ENV=prod php bin/console cache:clear --no-warmup --no-debug
-RUN APP_ENV=prod php bin/console cache:warmup --no-debug
-
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html/var
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Configure Apache
 RUN a2enmod rewrite
@@ -38,4 +38,4 @@ COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 # Expose port
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+ENTRYPOINT ["docker-entrypoint.sh"]
