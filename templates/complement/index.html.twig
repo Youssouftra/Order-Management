@@ -45,7 +45,11 @@
         {% for complement in complements %}
             <div class="product-card">
                 {% if complement.image %}
-                    <img src="{{ complement.image }}" alt="{{ complement.nom }}" class="product-image">
+                    {% if complement.image starts with 'http' %}
+                        <img src="{{ complement.image }}" alt="{{ complement.nom }}" class="product-image">
+                    {% else %}
+                        <img src="https://res.cloudinary.com/di38pznie/image/upload/v1/brasil-burger/{{ complement.image }}" alt="{{ complement.nom }}" class="product-image" onerror="this.parentElement.innerHTML='<div class=\'product-image-placeholder\'><i class=\'bi bi-image\'></i></div>';">
+                    {% endif %}
                 {% else %}
                     <div class="product-image-placeholder">
                         {% if complement.type == 'boisson' %}

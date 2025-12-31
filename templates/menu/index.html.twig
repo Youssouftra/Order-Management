@@ -32,7 +32,11 @@
         {% for menu in menus %}
             <div class="product-card">
                 {% if menu.image %}
-                    <img src="{{ menu.image }}" alt="{{ menu.nom }}" class="product-image">
+                    {% if menu.image starts with 'http' %}
+                        <img src="{{ menu.image }}" alt="{{ menu.nom }}" class="product-image">
+                    {% else %}
+                        <img src="https://res.cloudinary.com/di38pznie/image/upload/v1/brasil-burger/{{ menu.image }}" alt="{{ menu.nom }}" class="product-image" onerror="this.parentElement.innerHTML='<div class=\'product-image-placeholder\'><i class=\'bi bi-basket3-fill\'></i></div>';">
+                    {% endif %}
                 {% else %}
                     <div class="product-image-placeholder">
                         <i class="bi bi-basket3-fill"></i>
