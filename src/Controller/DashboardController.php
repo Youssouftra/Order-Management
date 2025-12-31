@@ -2,13 +2,10 @@
 
 namespace App\Controller;
 
-use App\Entity\Commande;
-use App\Repository\BurgerRepository;
 use App\Repository\CommandeRepository;
-use App\Repository\ComplementRepository;
 use App\Repository\LigneCommandeRepository;
 use App\Repository\LivreurRepository;
-use App\Repository\MenuRepository;
+use App\Repository\ProduitRepository;
 use App\Repository\ZoneRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,9 +15,7 @@ class DashboardController extends AbstractController
 {
     public function __construct(
         private CommandeRepository $commandeRepository,
-        private BurgerRepository $burgerRepository,
-        private ComplementRepository $complementRepository,
-        private MenuRepository $menuRepository,
+        private ProduitRepository $produitRepository,
         private ZoneRepository $zoneRepository,
         private LivreurRepository $livreurRepository,
         private LigneCommandeRepository $ligneCommandeRepository
