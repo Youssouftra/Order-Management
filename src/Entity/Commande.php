@@ -54,10 +54,10 @@ class Commande
     #[ORM\Column(name: 'date_commande', type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(columnDefinition: 'statut_commande_enum')]
+    #[ORM\Column(type: 'string', length: 50)]
     private ?string $statut = 'EN_ATTENTE';
 
-    #[ORM\Column(name: 'type_livraison', columnDefinition: 'type_livraison_enum')]
+    #[ORM\Column(name: 'type_livraison', type: 'string', length: 50)]
     private ?string $typeLivraison = 'LIVRAISON';
 
     #[ORM\ManyToOne]
