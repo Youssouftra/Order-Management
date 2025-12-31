@@ -30,13 +30,15 @@ class DashboardController extends AbstractController
     #[Route('/', name: 'app_dashboard')]
     public function index(): Response
     {
+        $today = new \DateTime();
+        
         return $this->render('dashboard/index.html.twig', [
-            'commandesEnCours' => 0,
-            'commandesLivrees' => 0,
-            'commandesAnnulees' => 0,
-            'recetteJournaliere' => 0,
+            'commandesEnCours' => $this->commandeRepository->countEnCours(),
+            'commandesLivrees' => $this->commandeRepository->countByEtat('TERMINEE'),
+            'commandesAnnulees' => $this->commandeRepository->countByEtat('ANNULEE'),
+            'recetteJournaliere' => $this->commandeRepository->getRecetteJournaliere($today),
             'topBurgers' => [],
-            'commandesRecentes' => [],
+            'commandesRecentes' => $this->commandeRepository->findRecent(10),
         ]);
     }
 }
