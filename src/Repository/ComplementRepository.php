@@ -4,12 +4,8 @@ namespace App\Repository;
 
 use App\Entity\Complement;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Complement>
- */
 class ComplementRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -17,49 +13,29 @@ class ComplementRepository extends ServiceEntityRepository
         parent::__construct($registry, Complement::class);
     }
 
-    public function findPaginated(int $page, int $limit, ?string $search = null, ?string $type = null, ?bool $isActive = null): Paginator
+    public function findPaginated(int $page, int $limit, ?string $search, ?bool $isActive, ?string $type)
     {
         $qb = $this->createQueryBuilder('c')
-            ->orderBy('c.createdAt', 'DESC');
-
+            ->where('c.typeProduit = :typeProduit')
+            ->setParameter('typeProduit', 'COMPLEMENT')
+            ->orderBy('c.nom', 'ASC')
+            ->setMaxResults($limit);
+        
         if ($search) {
-            $qb->andWhere('LOWER(c.nom) LIKE LOWER(:search) OR LOWER(c.description) LIKE LOWER(:search)')
+            $qb->andWhere('c.nom LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
-
+        
+        if ($isActive !== null) {
+            $qb->andWhere('c.disponible = :active')
+               ->setParameter('active', $isActive);
+        }
+        
         if ($type) {
-            $qb->andWhere('c.type = :type')
+            $qb->andWhere('c.typeComplement = :type')
                ->setParameter('type', $type);
         }
-
-        if ($isActive !== null) {
-            $qb->andWhere('c.isActive = :isActive')
-               ->setParameter('isActive', $isActive);
-        }
-
-        $qb->setFirstResult(($page - 1) * $limit)
-           ->setMaxResults($limit);
-
-        return new Paginator($qb);
-    }
-
-    public function countAll(): int
-    {
-        return $this->count([]);
-    }
-
-    public function countActive(): int
-    {
-        return $this->count(['isActive' => true]);
-    }
-
-    public function findAllActive(): array
-    {
-        return $this->findBy(['isActive' => true], ['nom' => 'ASC']);
-    }
-
-    public function findByType(string $type): array
-    {
-        return $this->findBy(['type' => $type, 'isActive' => true], ['nom' => 'ASC']);
+        
+        return $qb->getQuery()->getResult();
     }
 }

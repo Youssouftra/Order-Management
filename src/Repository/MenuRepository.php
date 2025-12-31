@@ -4,12 +4,8 @@ namespace App\Repository;
 
 use App\Entity\Menu;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Menu>
- */
 class MenuRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -17,42 +13,24 @@ class MenuRepository extends ServiceEntityRepository
         parent::__construct($registry, Menu::class);
     }
 
-    public function findPaginated(int $page, int $limit, ?string $search = null, ?bool $isActive = null): Paginator
+    public function findPaginated(int $page, int $limit, ?string $search, ?bool $isActive)
     {
         $qb = $this->createQueryBuilder('m')
-            ->leftJoin('m.burgers', 'b')
-            ->leftJoin('m.complements', 'c')
-            ->addSelect('b', 'c')
-            ->orderBy('m.createdAt', 'DESC');
-
+            ->where('m.typeProduit = :type')
+            ->setParameter('type', 'MENU')
+            ->orderBy('m.nom', 'ASC')
+            ->setMaxResults($limit);
+        
         if ($search) {
-            $qb->andWhere('LOWER(m.nom) LIKE LOWER(:search) OR LOWER(m.description) LIKE LOWER(:search)')
+            $qb->andWhere('m.nom LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
-
+        
         if ($isActive !== null) {
-            $qb->andWhere('m.isActive = :isActive')
-               ->setParameter('isActive', $isActive);
+            $qb->andWhere('m.disponible = :active')
+               ->setParameter('active', $isActive);
         }
-
-        $qb->setFirstResult(($page - 1) * $limit)
-           ->setMaxResults($limit);
-
-        return new Paginator($qb);
-    }
-
-    public function countAll(): int
-    {
-        return $this->count([]);
-    }
-
-    public function countActive(): int
-    {
-        return $this->count(['isActive' => true]);
-    }
-
-    public function findAllActive(): array
-    {
-        return $this->findBy(['isActive' => true], ['nom' => 'ASC']);
+        
+        return $qb->getQuery()->getResult();
     }
 }
