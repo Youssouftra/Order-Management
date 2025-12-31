@@ -6,6 +6,7 @@ use App\Repository\ComplementRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ComplementRepository::class)]
+#[ORM\Table(name: 'produits')]
 class Complement extends Produit
 {
     public function __construct()

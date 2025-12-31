@@ -6,6 +6,7 @@ use App\Repository\MenuRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MenuRepository::class)]
+#[ORM\Table(name: 'produits')]
 class Menu extends Produit
 {
     public function __construct()

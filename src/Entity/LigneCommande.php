@@ -5,9 +5,9 @@ namespace App\Entity;
 use App\Repository\LigneCommandeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: LigneCommandeRepository::class)]
+#[ORM\Table(name: 'commande_lignes')]
 class LigneCommande
 {
     #[ORM\Id]
@@ -16,143 +16,60 @@ class LigneCommande
     private ?int $id = null;
 
     #[ORM\Column]
-    #[Assert\Positive(message: 'La quantité doit être positive')]
     private int $quantite = 1;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[ORM\Column(name: 'prix_unitaire', type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $prixUnitaire = null;
 
-    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    #[ORM\Column(name: 'sous_total', type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $sousTotal = null;
 
     #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'commande_id', nullable: false)]
     private ?Commande $commande = null;
 
-    #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
-    private ?Burger $burger = null;
+    #[ORM\ManyToOne(targetEntity: Produit::class, inversedBy: 'ligneCommandes')]
+    #[ORM\JoinColumn(name: 'produit_id')]
+    private ?Produit $produit = null;
 
-    #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
-    private ?Complement $complement = null;
+    #[ORM\Column(name: 'created_at', type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
-    private ?Menu $menu = null;
-
-    public function getId(): ?int
+    public function __construct()
     {
-        return $this->id;
+        $this->createdAt = new \DateTime();
     }
 
-    public function getQuantite(): int
-    {
-        return $this->quantite;
+    public function getId(): ?int { return $this->id; }
+    public function getQuantite(): int { return $this->quantite; }
+    public function setQuantite(int $quantite): static { $this->quantite = $quantite; $this->calculerSousTotal(); return $this; }
+    public function getPrixUnitaire(): ?string { return $this->prixUnitaire; }
+    public function setPrixUnitaire(string $prixUnitaire): static { $this->prixUnitaire = $prixUnitaire; $this->calculerSousTotal(); return $this; }
+    public function getSousTotal(): ?string { return $this->sousTotal; }
+    public function setSousTotal(string $sousTotal): static { $this->sousTotal = $sousTotal; return $this; }
+    public function getCommande(): ?Commande { return $this->commande; }
+    public function setCommande(?Commande $commande): static { $this->commande = $commande; return $this; }
+    
+    public function getProduit(): ?Produit { return $this->produit; }
+    public function setProduit(?Produit $produit): static { 
+        $this->produit = $produit; 
+        if ($produit) { 
+            $this->prixUnitaire = $produit->getPrix(); 
+            $this->calculerSousTotal(); 
+        } 
+        return $this; 
     }
-
-    public function setQuantite(int $quantite): static
-    {
-        $this->quantite = $quantite;
-        $this->calculerSousTotal();
-        return $this;
-    }
-
-    public function getPrixUnitaire(): ?string
-    {
-        return $this->prixUnitaire;
-    }
-
-    public function setPrixUnitaire(string $prixUnitaire): static
-    {
-        $this->prixUnitaire = $prixUnitaire;
-        $this->calculerSousTotal();
-        return $this;
-    }
-
-    public function getSousTotal(): ?string
-    {
-        return $this->sousTotal;
-    }
-
-    public function setSousTotal(string $sousTotal): static
-    {
-        $this->sousTotal = $sousTotal;
-        return $this;
-    }
-
-    public function getCommande(): ?Commande
-    {
-        return $this->commande;
-    }
-
-    public function setCommande(?Commande $commande): static
-    {
-        $this->commande = $commande;
-        return $this;
-    }
-
-    public function getBurger(): ?Burger
-    {
-        return $this->burger;
-    }
-
-    public function setBurger(?Burger $burger): static
-    {
-        $this->burger = $burger;
-        if ($burger) {
-            $this->prixUnitaire = $burger->getPrix();
-            $this->calculerSousTotal();
-        }
-        return $this;
-    }
-
-    public function getComplement(): ?Complement
-    {
-        return $this->complement;
-    }
-
-    public function setComplement(?Complement $complement): static
-    {
-        $this->complement = $complement;
-        if ($complement) {
-            $this->prixUnitaire = $complement->getPrix();
-            $this->calculerSousTotal();
-        }
-        return $this;
-    }
-
-    public function getMenu(): ?Menu
-    {
-        return $this->menu;
-    }
-
-    public function setMenu(?Menu $menu): static
-    {
-        $this->menu = $menu;
-        if ($menu) {
-            $this->prixUnitaire = $menu->getPrix();
-            $this->calculerSousTotal();
-        }
-        return $this;
-    }
-
-    public function getProduit(): Burger|Complement|Menu|null
-    {
-        return $this->burger ?? $this->complement ?? $this->menu;
-    }
-
-    public function getProduitNom(): string
-    {
-        $produit = $this->getProduit();
-        return $produit ? $produit->getNom() : 'Produit inconnu';
-    }
-
-    public function getProduitType(): string
-    {
-        if ($this->burger) return 'Burger';
-        if ($this->complement) return 'Complément';
-        if ($this->menu) return 'Menu';
-        return 'Inconnu';
-    }
-
+    
+    public function getBurger(): ?Burger { return $this->produit instanceof Burger ? $this->produit : null; }
+    public function setBurger(?Burger $burger): static { return $this->setProduit($burger); }
+    public function getComplement(): ?Complement { return $this->produit instanceof Complement ? $this->produit : null; }
+    public function setComplement(?Complement $complement): static { return $this->setProduit($complement); }
+    public function getMenu(): ?Menu { return $this->produit instanceof Menu ? $this->produit : null; }
+    public function setMenu(?Menu $menu): static { return $this->setProduit($menu); }
+    
+    public function getProduitNom(): string { return $this->produit ? $this->produit->getNom() : 'Produit inconnu'; }
+    public function getProduitType(): string { return $this->produit?->getTypeProduit() ?? 'Inconnu'; }
+    
     public function calculerSousTotal(): void
     {
         if ($this->prixUnitaire !== null) {
