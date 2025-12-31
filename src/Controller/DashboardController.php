@@ -25,15 +25,26 @@ class DashboardController extends AbstractController
     #[Route('/', name: 'app_dashboard')]
     public function index(): Response
     {
-        $today = new \DateTime();
-        
-        return $this->render('dashboard/index.html.twig', [
-            'commandesEnCours' => $this->commandeRepository->countEnCours(),
-            'commandesLivrees' => $this->commandeRepository->countByEtat('TERMINEE'),
-            'commandesAnnulees' => $this->commandeRepository->countByEtat('ANNULEE'),
-            'recetteJournaliere' => $this->commandeRepository->getRecetteJournaliere($today),
-            'topBurgers' => [],
-            'commandesRecentes' => $this->commandeRepository->findRecent(10),
-        ]);
+        try {
+            $today = new \DateTime();
+            
+            return $this->render('dashboard/index.html.twig', [
+                'commandesEnCours' => $this->commandeRepository->countEnCours(),
+                'commandesLivrees' => $this->commandeRepository->countByEtat('TERMINEE'),
+                'commandesAnnulees' => $this->commandeRepository->countByEtat('ANNULEE'),
+                'recetteJournaliere' => $this->commandeRepository->getRecetteJournaliere($today),
+                'topBurgers' => [],
+                'commandesRecentes' => $this->commandeRepository->findRecent(10),
+            ]);
+        } catch (\Exception $e) {
+            return $this->render('dashboard/index.html.twig', [
+                'commandesEnCours' => 0,
+                'commandesLivrees' => 0,
+                'commandesAnnulees' => 0,
+                'recetteJournaliere' => '0.00',
+                'topBurgers' => [],
+                'commandesRecentes' => [],
+            ]);
+        }
     }
 }

@@ -69,11 +69,17 @@ class CommandeRepository extends ServiceEntityRepository
 
     public function findRecent(int $limit = 10): array
     {
-        return $this->createQueryBuilder('c')
-            ->orderBy('c.id', 'DESC')
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+        try {
+            return $this->createQueryBuilder('c')
+                ->leftJoin('c.client', 'cl')
+                ->addSelect('cl')
+                ->orderBy('c.id', 'DESC')
+                ->setMaxResults($limit)
+                ->getQuery()
+                ->getResult();
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     public function findForZoneView(array $filters = []): array
