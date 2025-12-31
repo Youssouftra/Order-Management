@@ -2,9 +2,16 @@ doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
         driver: 'pdo_pgsql'
-        server_version: '15'
+        server_version: '16'
+        charset: utf8
         profiling_collect_backtrace: '%kernel.debug%'
         use_savepoints: true
+        mapping_types:
+            type_produit_enum: string
+            type_complement_enum: string
+            statut_commande_enum: string
+            type_livraison_enum: string
+            mode_paiement_enum: string
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true
