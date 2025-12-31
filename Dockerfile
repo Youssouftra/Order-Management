@@ -24,8 +24,8 @@ COPY . .
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html/var
+# Create var directory and set permissions
+RUN mkdir -p var/cache var/log && chown -R www-data:www-data /var/www/html/var
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/
