@@ -136,7 +136,7 @@
                                 </div>
                                 <div class="order-client">{{ commande.clientNom }}</div>
                                 <div class="order-meta">
-                                    <span><i class="bi bi-telephone"></i> {{ commande.clientTelephone|default('+221 77 123 45 67') }}</span>
+                                    <span><i class="bi bi-telephone"></i> {{ commande.clientTelephone }}</span>
                                     {% if commande.zone %}
                                         <span><i class="bi bi-geo-alt"></i> {{ commande.zone.nom }}</span>
                                     {% endif %}

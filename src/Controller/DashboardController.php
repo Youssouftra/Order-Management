@@ -27,14 +27,19 @@ class DashboardController extends AbstractController
     {
         try {
             $today = new \DateTime();
+            $commandesEnCours = $this->commandeRepository->countEnCours();
+            $commandesLivrees = $this->commandeRepository->countByEtat('TERMINEE');
+            $commandesAnnulees = $this->commandeRepository->countByEtat('ANNULEE');
+            $recetteJournaliere = $this->commandeRepository->getRecetteJournaliere($today);
+            $commandesRecentes = $this->commandeRepository->findRecent(10);
             
             return $this->render('dashboard/index.html.twig', [
-                'commandesEnCours' => $this->commandeRepository->countEnCours(),
-                'commandesLivrees' => $this->commandeRepository->countByEtat('TERMINEE'),
-                'commandesAnnulees' => $this->commandeRepository->countByEtat('ANNULEE'),
-                'recetteJournaliere' => $this->commandeRepository->getRecetteJournaliere($today),
+                'commandesEnCours' => $commandesEnCours,
+                'commandesLivrees' => $commandesLivrees,
+                'commandesAnnulees' => $commandesAnnulees,
+                'recetteJournaliere' => $recetteJournaliere,
                 'topBurgers' => [],
-                'commandesRecentes' => $this->commandeRepository->findRecent(10),
+                'commandesRecentes' => $commandesRecentes,
             ]);
         } catch (\Exception $e) {
             return $this->render('dashboard/index.html.twig', [
@@ -44,6 +49,7 @@ class DashboardController extends AbstractController
                 'recetteJournaliere' => '0.00',
                 'topBurgers' => [],
                 'commandesRecentes' => [],
+                'error' => $e->getMessage(),
             ]);
         }
     }
