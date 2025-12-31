@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Burger;
+use App\Entity\Produit;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -10,25 +10,26 @@ class BurgerRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Burger::class);
+        parent::__construct($registry, Produit::class);
     }
 
     public function findPaginated(int $page, int $limit, ?string $search, ?bool $isActive)
     {
-        $qb = $this->createQueryBuilder('b')
-            ->where('b.typeProduit = :type')
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.typeProduit = :type')
             ->setParameter('type', 'BURGER')
-            ->orderBy('b.nom', 'ASC')
+            ->orderBy('p.nom', 'ASC')
             ->setMaxResults($limit);
         
         if ($search) {
-            $qb->andWhere('b.nom LIKE :search')
+            $qb->andWhere('p.nom LIKE :search')
                ->setParameter('search', '%' . $search . '%');
         }
         
         if ($isActive !== null) {
-            $qb->andWhere('b.disponible = :active')
-               ->setParameter('active', $isActive);
+            $qb->andWhere('p.disponible = :active AND p.archived = :archived')
+               ->setParameter('active', $isActive)
+               ->setParameter('archived', false);
         }
         
         return $qb->getQuery()->getResult();
