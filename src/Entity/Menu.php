@@ -8,5 +8,4 @@ class Menu extends Produit
     public function getComplements() { return []; }
     public function addBurger($burger) { return $this; }
     public function addComplement($complement) { return $this; }
-    public function setUpdatedAt($date) { return $this; }
 }

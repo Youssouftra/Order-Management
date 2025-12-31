@@ -12,5 +12,4 @@ class Complement extends Produit
     public function getType(): ?string { return $this->getTypeComplement(); }
     public function setType(string $type): static { return $this->setTypeComplement($type); }
     public function getTypeLabel(): string { return $this->getTypeComplement() ?? ''; }
-    public function setUpdatedAt($date) { return $this; }
 }
